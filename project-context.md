@@ -14,7 +14,7 @@
 | Frontend | Vite + React + TailwindCSS |
 | Backend | Python FastAPI |
 | Speech-to-Text | Deepgram API (WebSocket) |
-| LLM Extraction | Claude API |
+| LLM Extraction | **Mistral AI** (MVP) → Azure OpenAI (si besoin) |
 | Base de données | PostgreSQL EU |
 
 ---
@@ -185,6 +185,149 @@ DEEPGRAM_API_KEY=your_api_key_here
 ### Architecture
 - Pas de sur-ingénierie
 - Flux linéaire MVP : Record → Transcribe → Extract → Display → Copy
+
+---
+
+## Mistral AI - Extraction SOAP
+
+### Installation SDK Python
+
+```bash
+pip install mistralai
+```
+
+### Configuration
+
+```python
+from mistralai.client import MistralClient
+
+# Initialisation (clé API en env var)
+client = MistralClient(api_key=os.getenv("MISTRAL_API_KEY"))
+```
+
+### Pattern d'Extraction SOAP
+
+```python
+# extraction_service.py
+from mistralai.client import MistralClient
+import os
+
+def extract_soap_note(transcript: str, template: str, language: str = "fr") -> str:
+    """
+    Extrait une note SOAP structurée à partir d'une transcription.
+
+    Args:
+        transcript: Texte transcrit de l'anamnèse
+        template: Template SOAP (4 sections)
+        language: Langue de la note (fr, de, en)
+
+    Returns:
+        Note SOAP formatée en markdown
+    """
+    client = MistralClient(api_key=os.getenv("MISTRAL_API_KEY"))
+
+    system_prompt = f"""Tu es un assistant médical expert en documentation clinique.
+Extrais les informations de la transcription et structure-les selon le template SOAP fourni.
+
+Règles CRITIQUES:
+- Utilise UNIQUEMENT les informations présentes dans la transcription
+- N'invente JAMAIS d'informations cliniques
+- Respecte strictement la structure du template
+- Génère la note en {language}
+- Si une section manque d'informations, écris "Non documenté" ou "À compléter"
+"""
+
+    user_prompt = f"""Template SOAP:
+{template}
+
+Transcription de l'anamnèse:
+{transcript}
+
+Génère la note SOAP complète en respectant strictement le template."""
+
+    response = client.chat(
+        model="mistral-large-2",
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt}
+        ],
+        temperature=0.3,  # Faible pour cohérence
+        max_tokens=2000
+    )
+
+    return response.choices[0].message.content
+```
+
+### Architecture Switchable LLM
+
+**IMPORTANT:** Utiliser une abstraction pour permettre le switch Mistral → Azure OpenAI facilement.
+
+```python
+# llm_provider.py
+from abc import ABC, abstractmethod
+from enum import Enum
+import os
+
+class LLMProvider(Enum):
+    MISTRAL = "mistral"
+    AZURE_OPENAI = "azure_openai"
+
+class BaseLLMClient(ABC):
+    @abstractmethod
+    def extract_soap_note(self, transcript: str, template: str, language: str) -> str:
+        pass
+
+class MistralClient(BaseLLMClient):
+    def __init__(self):
+        from mistralai.client import MistralClient as MC
+        self.client = MC(api_key=os.getenv("MISTRAL_API_KEY"))
+
+    def extract_soap_note(self, transcript: str, template: str, language: str) -> str:
+        # Implémentation Mistral (voir ci-dessus)
+        pass
+
+class AzureOpenAIClient(BaseLLMClient):
+    def __init__(self):
+        from openai import AzureOpenAI
+        self.client = AzureOpenAI(
+            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+            api_key=os.getenv("AZURE_OPENAI_KEY"),
+            api_version="2024-02-01"
+        )
+
+    def extract_soap_note(self, transcript: str, template: str, language: str) -> str:
+        # Implémentation Azure OpenAI
+        pass
+
+# Factory
+def get_llm_client() -> BaseLLMClient:
+    provider = LLMProvider(os.getenv("LLM_PROVIDER", "mistral"))
+    if provider == LLMProvider.MISTRAL:
+        return MistralClient()
+    elif provider == LLMProvider.AZURE_OPENAI:
+        return AzureOpenAIClient()
+```
+
+### Variables d'Environnement
+
+```bash
+# MVP
+LLM_PROVIDER=mistral
+MISTRAL_API_KEY=your_mistral_api_key
+
+# Si switch vers Azure
+LLM_PROVIDER=azure_openai
+AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com/
+AZURE_OPENAI_KEY=your_azure_key
+```
+
+### Paramètres Critiques
+
+| Paramètre | Valeur | Justification |
+|-----------|--------|---------------|
+| `model` | `mistral-large-2` | Meilleur modèle Mistral pour extraction structurée |
+| `temperature` | `0.3` | Faible = cohérence et précision (pas de créativité) |
+| `max_tokens` | `2000` | Suffisant pour note SOAP complète |
 
 ---
 
