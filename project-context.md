@@ -7,15 +7,221 @@
 **Nom:** SOAP Notice
 **Description:** Application de transcription audio pour physiothérapeutes - transforme des enregistrements d'anamnèses en notes SOAP structurées.
 
-## Stack Technique
+---
+
+## Stack Technique Complète
 
 | Composant | Technologie |
 |-----------|-------------|
-| Frontend | Vite + React + TailwindCSS |
-| Backend | Python FastAPI |
-| Speech-to-Text | Deepgram API (WebSocket) |
-| LLM Extraction | **Mistral AI** (MVP) → Azure OpenAI (si besoin) |
-| Base de données | PostgreSQL EU |
+| **Frontend** | Vite + React + TypeScript + TailwindCSS + shadcn/ui |
+| **State Management** | Zustand (état local) + TanStack Query (données serveur) |
+| **Routing** | TanStack Router |
+| **Forms** | React Hook Form |
+| **Audio Capture** | Web Audio API native |
+| **Backend** | Python FastAPI (async) |
+| **ORM** | SQLAlchemy 2.0 async |
+| **Migrations** | Alembic |
+| **Validation** | Pydantic v2 |
+| **Auth** | Authlib + JWT + httpOnly Cookie |
+| **Database** | Neon (PostgreSQL serverless EU) |
+| **STT** | Deepgram API (nova-3, WebSocket) |
+| **LLM** | Mistral AI (abstraction switchable vers Azure OpenAI) |
+| **Payments** | Stripe |
+| **Hosting Frontend** | Vercel |
+| **Hosting Backend** | Railway (EU region) |
+| **Monitoring** | Sentry |
+
+---
+
+## Coding Standards - OBLIGATOIRES
+
+### Documentation
+
+**RÈGLE CRITIQUE:** JSDoc (TypeScript) et Docstrings (Python) sur TOUTES les fonctions, interfaces et classes publiques.
+
+**Format JSDoc (Frontend):**
+```typescript
+/**
+ * Description de la fonction.
+ *
+ * @param paramName - Description du paramètre
+ * @returns Description du retour
+ */
+export function myFunction(paramName: string): ReturnType {
+  // ...
+}
+```
+
+**Format Docstring (Backend):**
+```python
+def my_function(param_name: str) -> ReturnType:
+    """
+    Description de la fonction.
+
+    Args:
+        param_name: Description du paramètre
+
+    Returns:
+        Description du retour
+    """
+    pass
+```
+
+### Conventions de Nommage
+
+| Contexte | Convention | Exemple |
+|----------|------------|---------|
+| **Tables/Colonnes DB** | snake_case | `soap_notes`, `user_id`, `created_at` |
+| **Endpoints API** | Pluriel + kebab-case | `/api/v1/soap-notes`, `/api/v1/users` |
+| **Composants React** | PascalCase | `RecordButton.tsx`, `SOAPEditor.tsx` |
+| **Fichiers React** | PascalCase | `RecordButton.tsx` |
+| **Hooks React** | camelCase + use | `useRecording.ts`, `useQuota.ts` |
+| **Fonctions TS** | camelCase | `formatDate()`, `handleSubmit()` |
+| **Variables TS** | camelCase | `isRecording`, `currentNote` |
+| **Constantes** | SCREAMING_SNAKE_CASE | `MAX_RECORDING_TIME` |
+| **Types/Interfaces** | PascalCase | `SOAPNote`, `UserQuota` |
+| **Fichiers Python** | snake_case | `soap_notes.py` |
+| **Classes Python** | PascalCase | `SOAPNote`, `UserService` |
+| **Fonctions Python** | snake_case | `get_user_quota()` |
+| **JSON fields (API)** | camelCase | `createdAt`, `userId` |
+
+### Git Commits
+
+Format: Conventional Commits
+```
+feat(recording): add pause/resume functionality
+fix(auth): handle expired JWT token gracefully
+docs(api): add endpoint documentation
+refactor(notes): extract SOAP formatting to service
+test(quota): add unit tests for quota calculation
+chore(deps): update TanStack Query to v5.18
+```
+
+---
+
+## Structure Projet
+
+### Frontend (`/frontend/src/`)
+
+```
+src/
+├── features/           # Par fonctionnalité
+│   ├── auth/          # components/, hooks/, pages/
+│   ├── recording/     # components/, hooks/, pages/
+│   ├── notes/         # components/, hooks/, pages/
+│   ├── billing/       # components/, hooks/, pages/
+│   └── settings/      # components/, pages/
+├── components/        # Composants partagés
+│   ├── ui/           # shadcn/ui components
+│   └── layout/       # Header, BottomNav, etc.
+├── hooks/            # Hooks partagés
+├── lib/              # Utilitaires (api.ts, utils.ts)
+├── types/            # Types globaux
+└── routes/           # TanStack Router
+```
+
+### Backend (`/backend/app/`)
+
+```
+app/
+├── routers/          # Endpoints API par domaine
+├── services/         # Logique métier
+├── models/           # SQLAlchemy ORM
+├── schemas/          # Pydantic request/response
+├── core/             # database.py, security.py, exceptions.py
+└── tests/            # Tests co-located
+```
+
+### Tests
+
+**RÈGLE:** Tests co-located avec le code source.
+```
+RecordButton/
+├── RecordButton.tsx
+├── RecordButton.test.tsx   # Test à côté
+└── index.ts
+```
+
+---
+
+## API Patterns
+
+### Versioning
+
+Toutes les routes API commencent par `/api/v1/`
+
+### Format Réponse Succès
+
+Format direct (pas de wrapper):
+```json
+{ "id": "abc", "subjective": "...", "createdAt": "2026-01-17T10:30:00Z" }
+```
+
+### Format Erreur
+
+```json
+{
+  "error": {
+    "code": "QUOTA_EXCEEDED",
+    "message": "Vous avez atteint votre quota mensuel",
+    "details": { "used": 50, "limit": 50 }
+  }
+}
+```
+
+**Codes d'erreur:**
+- `INVALID_REQUEST` (400)
+- `VALIDATION_ERROR` (400)
+- `UNAUTHORIZED` (401)
+- `QUOTA_EXCEEDED` (403)
+- `TRIAL_EXPIRED` (403)
+- `NOT_FOUND` (404)
+- `AUDIO_TOO_LONG` (413)
+- `RATE_LIMITED` (429)
+- `INTERNAL_ERROR` (500)
+- `SERVICE_UNAVAILABLE` (503)
+
+### Dates
+
+- **API (JSON):** ISO 8601 UTC → `2026-01-17T10:30:00Z`
+- **Database:** TIMESTAMP WITH TIME ZONE
+- **UI:** Localisé selon langue utilisateur
+
+---
+
+## Frontend Patterns
+
+### State Management
+
+```typescript
+// Zustand pour état local
+const useStore = create((set) => ({
+  isRecording: false,
+  startRecording: () => set({ isRecording: true }),
+}));
+
+// TanStack Query pour données serveur
+const { data, isLoading } = useQuery({
+  queryKey: ['notes'],
+  queryFn: fetchNotes
+});
+```
+
+### Loading States Pattern
+
+```tsx
+if (error) return <ErrorMessage error={error} />;
+if (isLoading) return <Skeleton />;
+if (data.length === 0) return <EmptyState />;
+return <DataList data={data} />;
+```
+
+### Error Handling
+
+- Erreur réseau → Toast + retry automatique (TanStack Query)
+- Erreur validation → Message inline sous le champ
+- Erreur quota → Modal avec CTA upgrade
+- Erreur serveur → Toast + log Sentry
 
 ---
 
@@ -34,25 +240,22 @@ pip install deepgram-sdk httpx
 
 | Langue | Code Deepgram | Statut Nova-3 |
 |--------|---------------|---------------|
-| Français | `fr`, `fr-CA` | ✅ Supporté |
-| Allemand | `de`, `de-CH` | ✅ Supporté |
-| Anglais | `en`, `en-US`, `en-GB` | ✅ Supporté |
-| Espagnol | `es`, `es-419` | ✅ Supporté |
-| Multilingue auto | `multi` | ✅ Détection automatique |
+| Français | `fr`, `fr-CA` | Supporté |
+| Allemand | `de`, `de-CH` | Supporté |
+| Anglais | `en`, `en-US`, `en-GB` | Supporté |
+| Espagnol | `es`, `es-419` | Supporté |
+| Multilingue auto | `multi` | Détection automatique |
 
 ```python
 # Configuration multilingue
 model = "nova-3"
 language = "multi"  # Détection automatique de la langue
-# OU spécifier explicitement: "fr", "de", "en", "es"
 smart_format = True
 ```
 
 ### Pattern de Transcription Live (WebSocket)
 
 ```python
-# main.py - Pattern de référence Deepgram Live Streaming
-
 import httpx
 import threading
 from deepgram import DeepgramClient
@@ -63,17 +266,17 @@ def transcribe_audio_stream(audio_source_url: str) -> None:
     """
     Transcrit un flux audio en temps réel via Deepgram WebSocket.
 
-    IMPORTANT:
-    - La clé API doit être dans DEEPGRAM_API_KEY (env var)
-    - Utiliser nova-3 avec language=fr pour le français
-    """
-    deepgram = DeepgramClient()  # Lit DEEPGRAM_API_KEY automatiquement
+    Args:
+        audio_source_url: URL du flux audio à transcrire
 
-    # Connexion WebSocket avec paramètres optimaux
-    # language: "fr", "de", "en", "es" ou "multi" (détection auto)
+    Note:
+        La clé API doit être dans DEEPGRAM_API_KEY (env var)
+    """
+    deepgram = DeepgramClient()
+
     with deepgram.listen.v1.connect(
         model="nova-3",
-        language="multi",  # Ou langue spécifique selon sélection user
+        language="multi",
         smart_format=True,
         punctuate=True,
     ) as connection:
@@ -82,24 +285,20 @@ def transcribe_audio_stream(audio_source_url: str) -> None:
             """Callback pour chaque résultat de transcription."""
             if hasattr(message, 'channel') and hasattr(message.channel, 'alternatives'):
                 transcript = message.channel.alternatives[0].transcript
-                if transcript:  # Ignorer les résultats vides
+                if transcript:
                     print(f"Transcription: {transcript}")
-                    # TODO: Envoyer au LLM pour extraction SOAP
 
-        # Enregistrer les event handlers
         connection.on(EventType.OPEN, lambda _: print("Connexion Deepgram ouverte"))
         connection.on(EventType.MESSAGE, on_message)
         connection.on(EventType.CLOSE, lambda _: print("Connexion fermée"))
         connection.on(EventType.ERROR, lambda err: print(f"Erreur: {err}"))
 
-        # Thread d'écoute
         def listening_thread():
             connection.start_listening()
 
         listen_thread = threading.Thread(target=listening_thread)
         listen_thread.start()
 
-        # Thread de streaming audio
         def stream_audio():
             with httpx.stream("GET", audio_source_url) as response:
                 for chunk in response.iter_bytes():
@@ -108,7 +307,6 @@ def transcribe_audio_stream(audio_source_url: str) -> None:
         audio_thread = threading.Thread(target=stream_audio)
         audio_thread.start()
 
-        # Attendre la fin
         audio_thread.join()
         listen_thread.join()
 ```
@@ -124,68 +322,6 @@ def transcribe_audio_stream(audio_source_url: str) -> None:
 | `interim_results` | `false` | Résultats finaux uniquement (défaut) |
 | `endpointing` | `300` | Délai fin de phrase en ms (optionnel) |
 
-### Structure des Résultats
-
-```python
-# Le message reçu contient:
-message.channel.alternatives[0].transcript  # Le texte transcrit
-message.channel.alternatives[0].confidence  # Score de confiance (0-1)
-message.channel.alternatives[0].words       # Liste des mots avec timestamps
-
-# Chaque mot:
-word = {
-    "word": "bonjour",
-    "start": 0.5,      # Timestamp début (secondes)
-    "end": 0.8,        # Timestamp fin
-    "confidence": 0.98
-}
-```
-
-### Gestion des Erreurs
-
-```python
-# Messages de contrôle WebSocket
-# Envoyer pour garder la connexion active:
-connection.send({"type": "KeepAlive"})
-
-# Pour terminer proprement:
-connection.send({"type": "CloseStream"})
-
-# Pour forcer le flush des résultats:
-connection.send({"type": "Finalize"})
-```
-
-### Variables d'Environnement Requises
-
-```bash
-DEEPGRAM_API_KEY=your_api_key_here
-```
-
----
-
-## Contraintes Projet
-
-### Multilingue
-- **Langues MVP:** Français, Allemand, Anglais, Espagnol
-- L'utilisateur peut sélectionner la langue OU utiliser la détection automatique (`multi`)
-- L'interface utilisateur doit supporter ces 4 langues
-- Les notes SOAP générées sont dans la langue de la transcription
-
-### RGPD / Données de Santé
-- Serveurs EU uniquement pour PostgreSQL
-- Pas de stockage permanent des audio (transcription uniquement)
-- Chiffrement des données en transit et au repos
-
-### UX
-- Interface minimaliste : 1 bouton enregistrer, 1 bouton copier
-- Latence acceptable : < 30s pour 10min d'audio
-- Édition post-transcription obligatoire
-- Sélecteur de langue visible
-
-### Architecture
-- Pas de sur-ingénierie
-- Flux linéaire MVP : Record → Transcribe → Extract → Display → Copy
-
 ---
 
 ## Mistral AI - Extraction SOAP
@@ -196,19 +332,9 @@ DEEPGRAM_API_KEY=your_api_key_here
 pip install mistralai
 ```
 
-### Configuration
-
-```python
-from mistralai.client import MistralClient
-
-# Initialisation (clé API en env var)
-client = MistralClient(api_key=os.getenv("MISTRAL_API_KEY"))
-```
-
 ### Pattern d'Extraction SOAP
 
 ```python
-# extraction_service.py
 from mistralai.client import MistralClient
 import os
 
@@ -251,7 +377,7 @@ Génère la note SOAP complète en respectant strictement le template."""
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
         ],
-        temperature=0.3,  # Faible pour cohérence
+        temperature=0.3,
         max_tokens=2000
     )
 
@@ -260,10 +386,7 @@ Génère la note SOAP complète en respectant strictement le template."""
 
 ### Architecture Switchable LLM
 
-**IMPORTANT:** Utiliser une abstraction pour permettre le switch Mistral → Azure OpenAI facilement.
-
 ```python
-# llm_provider.py
 from abc import ABC, abstractmethod
 from enum import Enum
 import os
@@ -275,50 +398,16 @@ class LLMProvider(Enum):
 class BaseLLMClient(ABC):
     @abstractmethod
     def extract_soap_note(self, transcript: str, template: str, language: str) -> str:
+        """Extrait une note SOAP depuis une transcription."""
         pass
 
-class MistralClient(BaseLLMClient):
-    def __init__(self):
-        from mistralai.client import MistralClient as MC
-        self.client = MC(api_key=os.getenv("MISTRAL_API_KEY"))
-
-    def extract_soap_note(self, transcript: str, template: str, language: str) -> str:
-        # Implémentation Mistral (voir ci-dessus)
-        pass
-
-class AzureOpenAIClient(BaseLLMClient):
-    def __init__(self):
-        from openai import AzureOpenAI
-        self.client = AzureOpenAI(
-            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-            api_key=os.getenv("AZURE_OPENAI_KEY"),
-            api_version="2024-02-01"
-        )
-
-    def extract_soap_note(self, transcript: str, template: str, language: str) -> str:
-        # Implémentation Azure OpenAI
-        pass
-
-# Factory
 def get_llm_client() -> BaseLLMClient:
+    """Factory pour obtenir le client LLM configuré."""
     provider = LLMProvider(os.getenv("LLM_PROVIDER", "mistral"))
     if provider == LLMProvider.MISTRAL:
         return MistralClient()
     elif provider == LLMProvider.AZURE_OPENAI:
         return AzureOpenAIClient()
-```
-
-### Variables d'Environnement
-
-```bash
-# MVP
-LLM_PROVIDER=mistral
-MISTRAL_API_KEY=your_mistral_api_key
-
-# Si switch vers Azure
-LLM_PROVIDER=azure_openai
-AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com/
-AZURE_OPENAI_KEY=your_azure_key
 ```
 
 ### Paramètres Critiques
@@ -328,6 +417,64 @@ AZURE_OPENAI_KEY=your_azure_key
 | `model` | `mistral-large-2` | Meilleur modèle Mistral pour extraction structurée |
 | `temperature` | `0.3` | Faible = cohérence et précision (pas de créativité) |
 | `max_tokens` | `2000` | Suffisant pour note SOAP complète |
+
+---
+
+## Contraintes Projet
+
+### RGPD / Données de Santé
+- Serveurs EU uniquement (Neon Frankfurt, Railway EU)
+- Pas de stockage permanent des audio (transcription uniquement)
+- Chiffrement des données en transit (TLS 1.3) et au repos
+
+### Performance
+- Latence totale < 30s après Stop
+- 99% uptime cible
+
+### Multilingue
+- Langues MVP: Français, Allemand, Anglais, Espagnol
+- Détection automatique disponible (`multi`)
+
+---
+
+## Variables d'Environnement
+
+```bash
+# Database
+DATABASE_URL=postgresql://...
+
+# Auth
+GOOGLE_CLIENT_ID=xxx
+GOOGLE_CLIENT_SECRET=xxx
+JWT_SECRET_KEY=xxx
+
+# External Services
+DEEPGRAM_API_KEY=xxx
+MISTRAL_API_KEY=xxx
+LLM_PROVIDER=mistral
+
+# Payments
+STRIPE_SECRET_KEY=xxx
+STRIPE_WEBHOOK_SECRET=xxx
+
+# Monitoring
+SENTRY_DSN=xxx
+
+# App Config
+APP_ENV=development
+API_BASE_URL=http://localhost:8000
+FRONTEND_URL=http://localhost:5173
+```
+
+---
+
+## Règles de Sécurité
+
+**INTERDIT:**
+- Clés API dans le code → Variables d'environnement
+- `console.log` de tokens/passwords → Logger uniquement les IDs
+- SQL brut avec concaténation → SQLAlchemy ORM
+- `.env` dans Git → `.env.example` avec placeholders
 
 ---
 
