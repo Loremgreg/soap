@@ -2,3 +2,5 @@
 __pycache__/
 .venv/
 .md
+.env.local   
+_bmad/bmm/config.yaml 

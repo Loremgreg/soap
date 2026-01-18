@@ -4,7 +4,7 @@
 # Date: 2026-01-13T14:44:48.364Z
 
 project_name: soap-notice
-user_skill_level: intermediate
+user_skill_level: beginner
 planning_artifacts: "{project-root}/\t/planning-artifacts"
 implementation_artifacts: "{project-root}/\t/implementation-artifacts"
 project_knowledge: "{project-root}/docs"
