@@ -196,6 +196,32 @@ backend/
 | **Migrations** | Alembic | Auto-génère migrations depuis modèles, rollback facile |
 | **Cache** | Pas de cache MVP | < 100 users, complexité non justifiée |
 
+### Configuration Rules
+
+**Principe : Configuration-driven, pas de changement de code pour modifier les paramètres business.**
+
+Les paramètres suivants sont stockés dans la table `plans` et modifiables sans déploiement :
+
+| Paramètre | Description | Exemple valeurs |
+|-----------|-------------|-----------------|
+| `max_notes_retention` | Nombre max de notes conservées par user | 10 |
+| `max_recording_minutes` | Durée max d'un enregistrement | 10 |
+| `quota_monthly` | Nombre de visites par mois | 20, 50 |
+| `price_monthly` | Prix mensuel en centimes | 2900, 4900 |
+
+**Implémentation :**
+```python
+# Les limites sont lues depuis la DB, jamais hardcodées
+user_plan = await get_user_plan(user_id)
+if recording_duration > user_plan.max_recording_minutes * 60:
+    raise AudioTooLongError()
+```
+
+**Avantages :**
+- Ajout de nouveaux plans sans déploiement
+- A/B testing de pricing possible
+- Ajustement des limites en production instantané
+
 ### Authentication & Security
 
 | Décision | Choix | Justification |
@@ -374,6 +400,23 @@ app/
 | **Dates DB** | TIMESTAMP WITH TIME ZONE |
 | **Dates UI** | Localisé selon langue utilisateur |
 | **JSON fields** | camelCase (conversion auto Pydantic) |
+
+### Business Rules (Implementation Critical)
+
+**Règle de langue des notes :**
+La note SOAP générée est **TOUJOURS** dans la langue de l'application de l'utilisateur (`user.app_language`), **jamais** dans la langue de la transcription audio.
+
+```python
+# Correct : langue = setting utilisateur
+note = await extract_soap_note(
+    transcript=transcript,  # peut être en DE, EN, FR, ES, autre
+    output_language=user.app_language  # FR, DE, ou EN selon setting user
+)
+
+# Incorrect : ne jamais détecter la langue du transcript pour output
+```
+
+**Exemple :** Un kiné suisse avec app en français enregistre un patient germanophone → la note est générée en français.
 
 ### Process Patterns
 

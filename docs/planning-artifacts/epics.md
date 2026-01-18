@@ -64,6 +64,10 @@ This document provides the complete epic and story breakdown for SOAP Notice, de
 - FR27: Bottom navigation : Home (Record) / History / Settings
 - FR28: Sélecteur de langue visible dans Settings
 
+**Administration & Conformité:**
+- FR29: Dashboard admin avec métriques business (users, MRR, visites) et techniques (latence, erreurs)
+- FR30: API suppression compte complète (droit à l'oubli RGPD Art. 17)
+
 ### Non-Functional Requirements
 
 **Performance:**
@@ -162,6 +166,8 @@ This document provides the complete epic and story breakdown for SOAP Notice, de
 | FR26 | Epic 2 | PWA responsive |
 | FR27 | Epic 2 | Bottom navigation |
 | FR28 | Epic 6 | Language selector |
+| FR29 | Epic 8 | Dashboard admin (users, MRR, métriques) |
+| FR30 | Epic 8 | API suppression compte (droit à l'oubli RGPD) |
 
 ---
 
@@ -220,6 +226,14 @@ L'utilisateur peut surveiller son utilisation, acheter des visites supplémentai
 
 **FRs couverts:** FR19, FR20, FR21, FR22, FR23, FR24, FR25
 **Valeur livrée:** Voir compteur visites restantes, alertes quota, acheter upsell +5/+10, payer via Stripe, protection rate limiting.
+
+---
+
+### Epic 8: Administration & Conformité RGPD
+Le fondateur peut monitorer la plateforme et les utilisateurs peuvent exercer leur droit à l'oubli.
+
+**FRs couverts:** FR29, FR30
+**Valeur livrée:** Dashboard admin avec métriques business/techniques, API de suppression complète de compte (RGPD).
 
 ---
 
@@ -1002,6 +1016,115 @@ So that resources are fairly distributed and costs are controlled.
 **When** detected
 **Then** alerts are sent to admin via Sentry
 **And** manual review can be triggered
+
+---
+
+### Epic 8: Administration & Conformité RGPD
+
+#### Story 8.1: Admin Dashboard
+
+As the founder/admin,
+I want a dashboard showing key business and technical metrics,
+So that I can monitor the health of the platform and make informed decisions.
+
+**Acceptance Criteria:**
+
+**Given** I am authenticated as an admin user
+**When** I access the admin dashboard (separate route /admin)
+**Then** I see a protected page requiring admin role
+**And** regular users cannot access this route
+
+**Given** I view the admin dashboard
+**When** the metrics load
+**Then** I see:
+- Total users (registered)
+- Active users (used app in last 30 days)
+- Paying users (active subscription)
+- Trial users (in trial period)
+- MRR (Monthly Recurring Revenue) calculated from active subscriptions
+- Total visits generated this month
+**And** metrics refresh on page load (no real-time updates needed MVP)
+
+**Given** I view usage metrics
+**When** the dashboard displays
+**Then** I see:
+- Visits generated today / this week / this month
+- Average latency (Stop → Note displayed) from last 24h
+- 99th percentile latency
+- Error count from Sentry (link to Sentry dashboard)
+
+**Given** I want to investigate a user issue
+**When** I search for a user by email
+**Then** I see their profile: email, plan, quota remaining, subscription status
+**And** I see their recent notes metadata (date, duration, language - NOT content)
+**And** I can trigger account deletion if requested (RGPD)
+
+**Given** the admin dashboard security
+**When** implementing access control
+**Then** admin role is determined by a flag in users table (is_admin boolean)
+**And** initially only Greg's account has is_admin=true
+**And** admin routes are protected at API level (not just frontend)
+
+**Given** the audit trail metrics (aggregated)
+**When** I view quality metrics
+**Then** I see:
+- Average edit count per note (indicates LLM quality)
+- Notes with 0 edits vs 1+ edits percentage
+- Average audio duration
+**And** these are aggregated statistics, not per-user details
+
+---
+
+#### Story 8.2: API Suppression Compte (Droit à l'Oubli RGPD)
+
+As a user,
+I want to delete my account and all associated data,
+So that I can exercise my RGPD right to be forgotten.
+
+**Acceptance Criteria:**
+
+**Given** I am logged in and in Settings
+**When** I scroll to the bottom of the page
+**Then** I see a "Supprimer mon compte" link/button
+**And** it is clearly visible but not prominent (destructive action)
+
+**Given** I tap "Supprimer mon compte"
+**When** the confirmation dialog appears
+**Then** I see a clear warning explaining:
+- All my notes will be permanently deleted
+- My subscription will be cancelled (no refund for current period)
+- This action cannot be undone
+**And** I must type "SUPPRIMER" (or equivalent) to confirm
+**And** I see [Annuler] and [Supprimer définitivement] buttons
+
+**Given** I confirm account deletion
+**When** the deletion process runs
+**Then** the API endpoint `DELETE /api/v1/users/me` is called
+**And** all my data is deleted:
+  - All notes (notes table)
+  - All recordings metadata (recordings table)
+  - Subscription record (subscriptions table)
+  - User record (users table)
+**And** Stripe subscription is cancelled via API (if active)
+**And** my session/JWT is invalidated
+**And** I am redirected to a "Compte supprimé" confirmation page
+**And** I am logged out
+
+**Given** the deletion is complete
+**When** I try to log in again with the same Google account
+**Then** I am treated as a new user (fresh start)
+**And** no trace of previous data exists
+
+**Given** the admin wants to delete a user (RGPD request via email)
+**When** the admin uses the admin dashboard
+**Then** the admin can trigger the same deletion process for any user
+**And** an audit log entry is created (admin_id, deleted_user_email, timestamp)
+
+**Given** the deletion API implementation
+**When** DELETE /api/v1/users/me is called
+**Then** deletion is performed in a transaction (all or nothing)
+**And** if any step fails, the transaction is rolled back
+**And** appropriate error message is returned
 
 ---
 
