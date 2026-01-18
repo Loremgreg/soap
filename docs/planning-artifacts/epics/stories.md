@@ -1,247 +1,8 @@
----
-status: complete
-stepsCompleted: ['step-01-validate-prerequisites', 'step-02-design-epics', 'step-03-create-stories', 'step-04-final-validation']
-inputDocuments:
-  - docs/planning-artifacts/prd.md
-  - docs/planning-artifacts/architecture.md
-  - docs/planning-artifacts/ux-design-specification.md
-  - project-context.md
----
+# Stories
 
-# SOAP Notice - Epic Breakdown
+## Epic 1: Authentification & Onboarding
 
-## Overview
-
-This document provides the complete epic and story breakdown for SOAP Notice, decomposing the requirements from the PRD, UX Design, and Architecture into implementable stories.
-
-## Requirements Inventory
-
-### Functional Requirements
-
-**Authentification & Onboarding:**
-- FR1: OAuth Google authentification (connexion en 1 clic)
-- FR2: Sélection de plan (Starter 29€/mois ou Pro 49€/mois) avec trial 7 jours
-- FR3: Trial gratuit 7 jours limité à 10 visites maximum
-
-**Recording & Transcription:**
-- FR4: Recording live avec indicateur visuel simple (pas de transcription visible pendant)
-- FR5: Durée maximum d'enregistrement : 10 minutes
-- FR6: Wake Lock API pour empêcher verrouillage écran pendant recording
-- FR7: Stop déclenche la transcription instantanément disponible (Deepgram WebSocket streaming)
-
-**Extraction SOAP:**
-- FR8: Extraction SOAP via Mistral AI en < 30 secondes après Stop
-- FR9: Note structurée en 4 sections : Subjective, Objective, Assessment (Clinical Reasoning), Plan
-
-**Édition & Copie:**
-- FR10: Affichage et édition de la note SOAP post-génération
-- FR11: Auto-save des modifications (toutes les 2 secondes)
-- FR12: Copier note complète dans presse-papier (1 bouton)
-- FR13: Copier sections individuelles (S/O/A/P) dans presse-papier
-
-**Historique:**
-- FR14: Note sauvegardée dans historique (max 10 notes avec suppression rolling)
-- FR15: Accès à l'historique des 10 dernières notes
-
-**Multilingue:**
-- FR16: Support 3 langues : Français, Allemand, Anglais
-- FR17: Détection automatique de langue disponible (option Auto)
-- FR18: Scripts de consentement patient disponibles (FR/DE/EN) dans tooltip
-
-**Quotas & Paiement:**
-- FR19: Dashboard avec compteur visites restantes en temps réel
-- FR20: Quotas par plan : Trial (5), Starter (20/mois), Pro (50/mois)
-- FR21: Upsell on-demand : +5 visites (+5€) ou +10 visites (+10€)
-- FR22: Blocage upload avec message quand quota atteint + proposition upsell
-- FR23: Stripe payment avec anniversary billing (cycle basé sur date d'inscription)
-
-**Protection & Limites:**
-- FR24: Rate limiting : max 10 uploads/heure/user
-- FR25: Hard limit audio : 10 minutes maximum par enregistrement
-
-**Interface:**
-- FR26: Interface web responsive mobile-first (PWA)
-- FR27: Bottom navigation : Home (Record) / History / Settings
-- FR28: Sélecteur de langue visible dans Settings
-
-**Administration & Conformité:**
-- FR29: Dashboard admin avec métriques business (users, MRR, visites) et techniques (latence, erreurs)
-- FR30: API suppression compte complète (droit à l'oubli RGPD Art. 17)
-
-### Non-Functional Requirements
-
-**Performance:**
-- NFR1: Latence totale génération note < 30 secondes après Stop (CRITIQUE)
-- NFR2: Qualité perçue : User satisfaction ≥ 4/5
-
-**Disponibilité:**
-- NFR3: 99% uptime cible
-
-**Sécurité & Conformité RGPD (Art. 9):**
-- NFR4: Chiffrement transit TLS 1.3
-- NFR5: Chiffrement repos PostgreSQL (données EU uniquement)
-- NFR6: Localisation données : Serveurs EU uniquement (Neon Frankfurt, Railway EU)
-- NFR7: Rétention audio : 0 jours (suppression immédiate post-transcription)
-- NFR8: Rétention notes : Max 10 dernières notes (suppression rolling)
-- NFR9: Droit à l'oubli : API de suppression complète sur demande
-
-**Monitoring:**
-- NFR10: Sentry pour erreurs et alertes
-- NFR11: Métriques latence pour validation < 30s en production
-
-**Accessibilité:**
-- NFR12: Touch targets minimum 44x44px (iOS guidelines)
-- NFR13: Support navigateurs : iOS Safari 14+, Chrome 90+, Firefox 88+
-
-### Additional Requirements
-
-**From Architecture - Starter/Setup:**
-- ARCH1: Frontend setup avec Vite + React + TypeScript + TailwindCSS + shadcn/ui
-- ARCH2: Backend setup avec Python FastAPI (async) + SQLAlchemy 2.0 + Pydantic v2
-- ARCH3: Database Neon (PostgreSQL Serverless EU - Frankfurt)
-- ARCH4: Alembic pour migrations DB
-- ARCH5: Authlib + JWT + httpOnly Cookie pour authentification
-
-**From Architecture - State Management:**
-- ARCH6: Zustand pour état local (isRecording, etc.)
-- ARCH7: TanStack Query pour données serveur avec cache
-- ARCH8: TanStack Router pour routing type-safe
-- ARCH9: React Hook Form pour formulaires
-
-**From Architecture - External Services:**
-- ARCH10: Deepgram nova-3 WebSocket streaming pour STT
-- ARCH11: Mistral AI (mistral-large-2) avec abstraction switchable vers Azure OpenAI
-- ARCH12: Stripe pour paiements + webhooks
-- ARCH13: Google OAuth 2.0 pour authentification
-
-**From Architecture - Infrastructure:**
-- ARCH14: Hébergement Frontend : Vercel (gratuit)
-- ARCH15: Hébergement Backend : Railway (EU region, ~5€/mois)
-- ARCH16: CI/CD intégré Vercel/Railway (push GitHub → deploy auto)
-
-**From UX Design:**
-- UX1: Mobile-first PWA (portrait prioritaire)
-- UX2: Wake Lock API pendant recording
-- UX3: Web Audio API pour capture microphone
-- UX4: Clipboard API pour copy
-- UX5: Bottom navigation (Home/History/Settings)
-- UX6: Progressive disclosure (settings cachés par défaut)
-- UX7: QuotaWidget toujours visible (sticky header)
-- UX8: RecordButton large (80x80px min), centré, pulse animation pendant recording
-- UX9: Timer visible pendant recording (HH:MM:SS)
-- UX10: SOAPEditor avec 4 sections éditables + boutons Copy individuels
-- UX11: Toast notifications pour feedback (Copy success, auto-save)
-- UX12: Skeleton loaders pendant génération note
-- UX13: ConsentDialog avec scripts multilingues
-
-### FR Coverage Map
-
-| FR | Epic | Description |
-|----|------|-------------|
-| FR1 | Epic 1 | OAuth Google |
-| FR2 | Epic 1 | Sélection plan Starter/Pro |
-| FR3 | Epic 1 | Trial 7 jours |
-| FR4 | Epic 2 | Recording live avec indicateur |
-| FR5 | Epic 2 | Limite 10 min max |
-| FR6 | Epic 2 | Wake Lock API |
-| FR7 | Epic 2 | Transcription Deepgram |
-| FR8 | Epic 3 | Extraction Mistral < 30s |
-| FR9 | Epic 3 | Structure 4 sections SOAP |
-| FR10 | Epic 4 | Affichage et édition |
-| FR11 | Epic 4 | Auto-save |
-| FR12 | Epic 4 | Copy note complète |
-| FR13 | Epic 4 | Copy sections individuelles |
-| FR14 | Epic 5 | Historique max 10 notes |
-| FR15 | Epic 5 | Accès historique |
-| FR16 | Epic 6 | Support FR/DE/EN |
-| FR17 | Epic 6 | Auto-detect langue |
-| FR18 | Epic 6 | Scripts consentement |
-| FR19 | Epic 7 | Dashboard quota |
-| FR20 | Epic 7 | Quotas par plan |
-| FR21 | Epic 7 | Upsell +5/+10 visites |
-| FR22 | Epic 7 | Blocage quota + message |
-| FR23 | Epic 7 | Stripe anniversary billing |
-| FR24 | Epic 7 | Rate limiting |
-| FR25 | Epic 7 | Hard limit audio |
-| FR26 | Epic 2 | PWA responsive |
-| FR27 | Epic 2 | Bottom navigation |
-| FR28 | Epic 6 | Language selector |
-| FR29 | Epic 8 | Dashboard admin (users, MRR, métriques) |
-| FR30 | Epic 8 | API suppression compte (droit à l'oubli RGPD) |
-
----
-
-## Epic List
-
-### Epic 1: Authentification & Onboarding
-L'utilisateur peut créer un compte, choisir son plan et démarrer son essai gratuit.
-
-**FRs couverts:** FR1, FR2, FR3
-**Valeur livrée:** Se connecter avec Google, choisir Starter/Pro, accéder au trial 7 jours avec 5 visites.
-
----
-
-### Epic 2: Enregistrement Audio
-L'utilisateur peut enregistrer l'audio de ses consultations de manière fiable sur mobile.
-
-**FRs couverts:** FR4, FR5, FR6, FR7, FR26, FR27
-**Valeur livrée:** Démarrer un recording, voir le timer, écran reste allumé, arrêter après max 10 min, interface mobile PWA avec bottom navigation.
-
----
-
-### Epic 3: Génération Note SOAP
-L'utilisateur reçoit une note clinique structurée automatiquement à partir de son enregistrement.
-
-**FRs couverts:** FR8, FR9
-**Valeur livrée:** Voir sa note SOAP générée en < 30s avec 4 sections (Subjective/Objective/Assessment/Plan).
-
----
-
-### Epic 4: Édition & Copie de Notes
-L'utilisateur peut éditer, affiner et exporter ses notes vers son logiciel métier.
-
-**FRs couverts:** FR10, FR11, FR12, FR13
-**Valeur livrée:** Éditer chaque section SOAP, auto-save automatique, copier note complète ou sections individuelles.
-
----
-
-### Epic 5: Historique des Notes
-L'utilisateur peut accéder et gérer ses notes précédentes.
-
-**FRs couverts:** FR14, FR15
-**Valeur livrée:** Voir les 10 dernières notes, les rouvrir, les éditer, les copier.
-
----
-
-### Epic 6: Support Multilingue & Settings
-L'utilisateur peut configurer l'application dans sa langue préférée et accéder aux scripts de consentement.
-
-**FRs couverts:** FR16, FR17, FR18, FR28
-**Valeur livrée:** Choisir FR/DE/EN/Auto-detect, lire le script consentement patient, ajuster ses préférences dans Settings.
-
----
-
-### Epic 7: Gestion Quotas & Facturation
-L'utilisateur peut surveiller son utilisation, acheter des visites supplémentaires et gérer son abonnement.
-
-**FRs couverts:** FR19, FR20, FR21, FR22, FR23, FR24, FR25
-**Valeur livrée:** Voir compteur visites restantes, alertes quota, acheter upsell +5/+10, payer via Stripe, protection rate limiting.
-
----
-
-### Epic 8: Administration & Conformité RGPD
-Le fondateur peut monitorer la plateforme et les utilisateurs peuvent exercer leur droit à l'oubli.
-
-**FRs couverts:** FR29, FR30
-**Valeur livrée:** Dashboard admin avec métriques business/techniques, API de suppression complète de compte (RGPD).
-
----
-
-## Stories
-
-### Epic 1: Authentification & Onboarding
-
-#### Story 1.1: Project Setup & Infrastructure
+### Story 1.1: Project Setup & Infrastructure
 
 As a developer,
 I want a fully configured project with frontend, backend, and database infrastructure,
@@ -277,7 +38,7 @@ So that I can start implementing user-facing features on a solid foundation.
 
 ---
 
-#### Story 1.2: OAuth Google Login
+### Story 1.2: OAuth Google Login
 
 As a physiotherapist,
 I want to login with my Google account in one click,
@@ -312,7 +73,7 @@ So that I can access the app quickly without creating another password.
 
 ---
 
-#### Story 1.3: Plan Selection & Trial Activation
+### Story 1.3: Plan Selection & Trial Activation
 
 As a new user,
 I want to choose my subscription plan and start a free trial,
@@ -356,9 +117,9 @@ So that I can test the app before committing to a paid subscription.
 
 ---
 
-### Epic 2: Enregistrement Audio
+## Epic 2: Enregistrement Audio
 
-#### Story 2.1: Mobile PWA Shell & Navigation
+### Story 2.1: Mobile PWA Shell & Navigation
 
 As a physiotherapist,
 I want a mobile-optimized interface with clear navigation,
@@ -390,7 +151,7 @@ So that I can use the app efficiently during consultations on my phone or tablet
 
 ---
 
-#### Story 2.2: Audio Recording Interface
+### Story 2.2: Audio Recording Interface
 
 As a physiotherapist,
 I want to start, pause, and stop audio recording with clear visual feedback,
@@ -446,7 +207,7 @@ So that I can reliably capture patient consultations without worrying about the 
 
 ---
 
-#### Story 2.3: Deepgram Streaming Integration
+### Story 2.3: Deepgram Streaming Integration
 
 As a system,
 I want to transcribe audio in real-time using Deepgram WebSocket streaming,
@@ -488,9 +249,9 @@ So that the transcription is ready immediately when recording stops.
 
 ---
 
-### Epic 3: Génération Note SOAP
+## Epic 3: Génération Note SOAP
 
-#### Story 3.1: SOAP Note Extraction with Mistral AI
+### Story 3.1: SOAP Note Extraction with Mistral AI
 
 As a physiotherapist,
 I want my recorded consultation to be automatically structured into a SOAP note,
@@ -546,7 +307,7 @@ So that I save time on documentation and get a professional clinical format.
 
 ---
 
-#### Story 3.2: Note Display with Loading States
+### Story 3.2: Note Display with Loading States
 
 As a physiotherapist,
 I want to see my generated SOAP note with clear loading feedback,
@@ -586,9 +347,9 @@ So that I know the system is working and can quickly review my note.
 
 ---
 
-### Epic 4: Édition & Copie de Notes
+## Epic 4: Édition & Copie de Notes
 
-#### Story 4.1: SOAP Note Editor
+### Story 4.1: SOAP Note Editor
 
 As a physiotherapist,
 I want to edit each section of my generated SOAP note,
@@ -632,7 +393,7 @@ So that I can correct any errors and add details before copying to my patient ma
 
 ---
 
-#### Story 4.2: Copy to Clipboard
+### Story 4.2: Copy to Clipboard
 
 As a physiotherapist,
 I want to copy my note (complete or by section) to my clipboard,
@@ -676,9 +437,9 @@ So that I can paste it into my patient management software with one tap.
 
 ---
 
-### Epic 5: Historique des Notes
+## Epic 5: Historique des Notes
 
-#### Story 5.1: Note History List
+### Story 5.1: Note History List
 
 As a physiotherapist,
 I want to see a list of my recent notes,
@@ -727,7 +488,7 @@ So that I can quickly find and access a previous consultation.
 
 ---
 
-#### Story 5.2: Note Detail & Actions
+### Story 5.2: Note Detail & Actions
 
 As a physiotherapist,
 I want to open a previous note and perform actions on it,
@@ -766,9 +527,9 @@ So that I can review, edit, or copy past consultations.
 
 ---
 
-### Epic 6: Support Multilingue & Settings
+## Epic 6: Support Multilingue & Settings
 
-#### Story 6.1: Settings Screen & Language Selection
+### Story 6.1: Settings Screen & Language Selection
 
 As a physiotherapist,
 I want to configure my language preference and other settings,
@@ -819,7 +580,7 @@ So that the app works in my preferred language and matches my workflow.
 
 ---
 
-#### Story 6.2: Patient Consent Scripts
+### Story 6.2: Patient Consent Scripts
 
 As a physiotherapist,
 I want to access patient consent scripts in multiple languages,
@@ -860,9 +621,9 @@ So that I can inform my patients about the recording before starting.
 
 ---
 
-### Epic 7: Gestion Quotas & Facturation
+## Epic 7: Gestion Quotas & Facturation
 
-#### Story 7.1: Quota Dashboard & Alerts
+### Story 7.1: Quota Dashboard & Alerts
 
 As a physiotherapist,
 I want to always see my remaining visits and receive alerts when running low,
@@ -902,7 +663,7 @@ So that I'm never surprised by quota exhaustion during a busy day.
 
 ---
 
-#### Story 7.2: Stripe Subscription & Payment
+### Story 7.2: Stripe Subscription & Payment
 
 As a user whose trial is ending,
 I want to activate my paid subscription with Stripe,
@@ -947,7 +708,7 @@ So that I can continue using the service without interruption.
 
 ---
 
-#### Story 7.3: Upsell & Additional Visits
+### Story 7.3: Upsell & Additional Visits
 
 As a physiotherapist who has exhausted my quota mid-month,
 I want to buy additional visits without waiting for the next billing cycle,
@@ -986,7 +747,7 @@ So that I can continue documenting consultations immediately.
 
 ---
 
-#### Story 7.4: Rate Limiting & Protection
+### Story 7.4: Rate Limiting & Protection
 
 As a system administrator,
 I want to protect the platform from abuse with rate limiting,
@@ -1019,9 +780,9 @@ So that resources are fairly distributed and costs are controlled.
 
 ---
 
-### Epic 8: Administration & Conformité RGPD
+## Epic 8: Administration & Conformité RGPD
 
-#### Story 8.1: Admin Dashboard
+### Story 8.1: Admin Dashboard
 
 As the founder/admin,
 I want a dashboard showing key business and technical metrics,
@@ -1075,7 +836,7 @@ So that I can monitor the health of the platform and make informed decisions.
 
 ---
 
-#### Story 8.2: API Suppression Compte (Droit à l'Oubli RGPD)
+### Story 8.2: API Suppression Compte (Droit à l'Oubli RGPD)
 
 As a user,
 I want to delete my account and all associated data,
