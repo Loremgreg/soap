@@ -93,7 +93,7 @@ So that I can test the app before committing to a paid subscription.
 **When** I click "Démarrer l'essai gratuit"
 **Then** a subscription record is created with status "trial"
 **And** trial_ends_at is set to now + 7 days
-**And** my quota is set to 10 visits (trial limit)
+**And** my quota is set to 5 visits (trial limit)
 **And** I am redirected to the home screen
 
 **Given** the subscription table schema

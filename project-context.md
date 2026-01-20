@@ -236,14 +236,13 @@ pip install deepgram-sdk httpx
 ### Modèle et Langues Supportées
 
 - **Modèle recommandé:** `nova-3` (meilleure précision, multilingue)
-- **Langues requises:** Français, Allemand, Anglais, Espagnol
+- **Langues requises:** Français, Allemand, Anglais
 
 | Langue | Code Deepgram | Statut Nova-3 |
 |--------|---------------|---------------|
 | Français | `fr`, `fr-CA` | Supporté |
 | Allemand | `de`, `de-CH` | Supporté |
 | Anglais | `en`, `en-US`, `en-GB` | Supporté |
-| Espagnol | `es`, `es-419` | Supporté |
 | Multilingue auto | `multi` | Détection automatique |
 
 ```python
@@ -432,7 +431,8 @@ def get_llm_client() -> BaseLLMClient:
 - 99% uptime cible
 
 ### Multilingue
-- Langues MVP: Français, Allemand, Anglais, Espagnol
+- Langues MVP: Français, Allemand, Anglais
+- Espagnol: Post-MVP (Phase 2)
 - Détection automatique disponible (`multi`)
 
 ---

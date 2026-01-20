@@ -1,0 +1,109 @@
+# generated: 2026-01-19
+# project: soap-notice
+# project_key: soap-notice
+# tracking_system: file-system
+# story_location: docs/implementation-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog → in-progress: Automatically when first story is created (via create-story)
+#   - in-progress → done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - SM typically creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+
+generated: 2026-01-19
+project: soap-notice
+project_key: soap-notice
+tracking_system: file-system
+story_location: docs/implementation-artifacts
+
+development_status:
+  # ═══════════════════════════════════════════════════════════════════
+  # Epic 1: Authentification & Onboarding
+  # ═══════════════════════════════════════════════════════════════════
+  epic-1: in-progress
+  1-1-project-setup-infrastructure: ready-for-dev
+  1-2-oauth-google-login: backlog
+  1-3-plan-selection-trial-activation: backlog
+  epic-1-retrospective: optional
+
+  # ═══════════════════════════════════════════════════════════════════
+  # Epic 2: Enregistrement Audio
+  # ═══════════════════════════════════════════════════════════════════
+  epic-2: backlog
+  2-1-mobile-pwa-shell-navigation: backlog
+  2-2-audio-recording-interface: backlog
+  2-3-deepgram-streaming-integration: backlog
+  epic-2-retrospective: optional
+
+  # ═══════════════════════════════════════════════════════════════════
+  # Epic 3: Generation Note SOAP
+  # ═══════════════════════════════════════════════════════════════════
+  epic-3: backlog
+  3-1-soap-note-extraction-with-mistral-ai: backlog
+  3-2-note-display-with-loading-states: backlog
+  epic-3-retrospective: optional
+
+  # ═══════════════════════════════════════════════════════════════════
+  # Epic 4: Edition & Copie de Notes
+  # ═══════════════════════════════════════════════════════════════════
+  epic-4: backlog
+  4-1-soap-note-editor: backlog
+  4-2-copy-to-clipboard: backlog
+  epic-4-retrospective: optional
+
+  # ═══════════════════════════════════════════════════════════════════
+  # Epic 5: Historique des Notes
+  # ═══════════════════════════════════════════════════════════════════
+  epic-5: backlog
+  5-1-note-history-list: backlog
+  5-2-note-detail-actions: backlog
+  epic-5-retrospective: optional
+
+  # ═══════════════════════════════════════════════════════════════════
+  # Epic 6: Support Multilingue & Settings
+  # ═══════════════════════════════════════════════════════════════════
+  epic-6: backlog
+  6-1-settings-screen-language-selection: backlog
+  6-2-patient-consent-scripts: backlog
+  epic-6-retrospective: optional
+
+  # ═══════════════════════════════════════════════════════════════════
+  # Epic 7: Gestion Quotas & Facturation
+  # ═══════════════════════════════════════════════════════════════════
+  epic-7: backlog
+  7-1-quota-dashboard-alerts: backlog
+  7-2-stripe-subscription-payment: backlog
+  7-3-upsell-additional-visits: backlog
+  7-4-rate-limiting-protection: backlog
+  epic-7-retrospective: optional
+
+  # ═══════════════════════════════════════════════════════════════════
+  # Epic 8: Administration & Conformite RGPD
+  # ═══════════════════════════════════════════════════════════════════
+  epic-8: backlog
+  8-1-admin-dashboard: backlog
+  8-2-api-suppression-compte-rgpd: backlog
+  epic-8-retrospective: optional
