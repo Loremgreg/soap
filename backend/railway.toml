@@ -1,0 +1,14 @@
+# Railway Configuration for SOAP Notice Backend
+# IMPORTANT: Deploy to EU region (eu-west) for GDPR compliance
+# Region is configured in Railway Dashboard > Project Settings > Region
+
+[build]
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+healthcheckPath = "/health"
+healthcheckTimeout = 100
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+# Note: Ensure project is deployed to eu-west region for GDPR/health data compliance

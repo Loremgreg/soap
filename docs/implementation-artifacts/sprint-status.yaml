@@ -44,7 +44,7 @@ development_status:
   # Epic 1: Authentification & Onboarding
   # ═══════════════════════════════════════════════════════════════════
   epic-1: in-progress
-  1-1-project-setup-infrastructure: ready-for-dev
+  1-1-project-setup-infrastructure: done
   1-2-oauth-google-login: backlog
   1-3-plan-selection-trial-activation: backlog
   epic-1-retrospective: optional

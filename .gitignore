@@ -2,6 +2,8 @@
 .env
 .env.local
 .env.*.local
+.env.development
+.env.production
 
 # Python
 __pycache__/
@@ -18,14 +20,17 @@ env/
 *.egg
 dist/
 build/
+*.whl
 
 # Node
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 .npm
 .yarn-integrity
+.pnpm-store/
 
 # IDE
 .idea/
@@ -50,6 +55,8 @@ htmlcov/
 .pytest_cache/
 .tox/
 .nox/
+coverage/
+*.lcov
 
 # Logs
 *.log
@@ -59,6 +66,16 @@ logs/
 *.pyc
 *.pyo
 *.pyd
+
+# Frontend Build
+frontend/dist/
+frontend/.cache/
+
+# Alembic
+alembic/versions/*.pyc
+
+# Sentry
+.sentryclirc
 
 # Custom
 .ignore/
