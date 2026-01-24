@@ -6,9 +6,11 @@ from typing import AsyncGenerator
 import sentry_sdk
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 
 from app.config import get_settings
 from app.core.exceptions import ApiException, api_exception_handler
+from app.routers import auth
 
 settings = get_settings()
 
@@ -41,6 +43,12 @@ app = FastAPI(
     redoc_url="/redoc" if settings.is_development else None,
 )
 
+# Session Middleware (required for OAuth state management)
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=settings.session_secret_key,
+)
+
 # CORS Configuration
 app.add_middleware(
     CORSMiddleware,
@@ -52,6 +60,9 @@ app.add_middleware(
 
 # Exception Handlers
 app.add_exception_handler(ApiException, api_exception_handler)
+
+# Routers
+app.include_router(auth.router, prefix="/api/v1")
 
 
 @app.get("/health")
