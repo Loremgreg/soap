@@ -4,7 +4,7 @@ import uuid
 
 from sqlalchemy import Boolean, Index, String, Text
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, TimestampMixin
 
@@ -60,6 +60,14 @@ class User(Base, TimestampMixin):
         nullable=False,
     )
 
+    # Relationship to subscription (one-to-one)
+    subscription: Mapped["Subscription | None"] = relationship(
+        "Subscription",
+        back_populates="user",
+        uselist=False,
+        lazy="selectin",
+    )
+
     # Explicit indexes for performance (also defined via unique=True above)
     __table_args__ = (
         Index("idx_users_google_id", "google_id"),
@@ -69,3 +77,7 @@ class User(Base, TimestampMixin):
     def __repr__(self) -> str:
         """Return string representation of User."""
         return f"<User(id={self.id}, email={self.email})>"
+
+
+# Import for type hints - avoid circular import
+from app.models.subscription import Subscription  # noqa: E402, F401

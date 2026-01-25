@@ -9,6 +9,7 @@ export interface User {
   name: string | null;
   avatarUrl: string | null;
   isAdmin: boolean;
+  hasSubscription: boolean;
   createdAt: string;
   updatedAt: string;
 }

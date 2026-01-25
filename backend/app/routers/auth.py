@@ -16,6 +16,7 @@ from app.core.security import create_access_token
 from app.models.user import User
 from app.schemas.user import UserResponse
 from app.services import auth as auth_service
+from app.services import subscription as subscription_service
 
 settings = get_settings()
 
@@ -136,7 +137,15 @@ async def google_callback(
     jwt_token = create_access_token(user_id=user.id, email=user.email)
 
     # Determine redirect destination
-    redirect_path = "/plan-selection" if is_new else "/"
+    # New users go to plan selection
+    # Returning users with subscription go to home
+    # Returning users without subscription go to plan selection
+    if is_new:
+        redirect_path = "/plan-selection"
+    else:
+        subscription = await subscription_service.get_user_subscription(db, user.id)
+        redirect_path = "/" if subscription else "/plan-selection"
+
     redirect_url = f"{settings.frontend_url}{redirect_path}"
 
     # Create response with redirect
@@ -149,23 +158,30 @@ async def google_callback(
 @router.get("/me", response_model=UserResponse)
 async def get_me(
     current_user: Annotated[User, Depends(get_current_user_dep)],
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> UserResponse:
     """
     Get the currently authenticated user.
 
     Uses the get_current_user dependency to extract and validate
-    the JWT from the httpOnly cookie.
+    the JWT from the httpOnly cookie. Also includes subscription status.
 
     Args:
         current_user: The authenticated user (injected by dependency)
+        db: Database session
 
     Returns:
-        Current user's information
+        Current user's information including subscription status
 
     Raises:
         UnauthorizedException: If not authenticated or token invalid
     """
-    return UserResponse.model_validate(current_user)
+    subscription = await subscription_service.get_user_subscription(db, current_user.id)
+
+    response = UserResponse.model_validate(current_user)
+    response.has_subscription = subscription is not None
+
+    return response
 
 
 @router.post("/logout")

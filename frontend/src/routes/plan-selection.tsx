@@ -1,19 +1,18 @@
+import { useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute';
 import { useAuth } from '@/features/auth';
+import {
+  PlanSelector,
+  usePlans,
+  useCreateTrialSubscription,
+} from '@/features/billing';
 
 /**
  * Plan selection page route.
  *
  * Shown to new users after OAuth signup to select their subscription plan.
+ * Displays two plan options (Starter and Pro) with trial activation.
  */
 export const Route = createFileRoute('/plan-selection')({
   component: PlanSelectionPage,
@@ -21,30 +20,55 @@ export const Route = createFileRoute('/plan-selection')({
 
 function PlanSelectionPage() {
   const { user } = useAuth();
+  const { data: plans = [], isLoading, error } = usePlans();
+  const createTrial = useCreateTrialSubscription();
+  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
+
+  /**
+   * Handles plan selection and trial activation.
+   *
+   * @param planId - UUID of the selected plan
+   */
+  const handleSelectPlan = (planId: string) => {
+    setSelectedPlanId(planId);
+    createTrial.mutate({ planId });
+  };
 
   return (
     <ProtectedRoute>
-      <div className="flex min-h-screen items-center justify-center p-4">
-        <Card className="w-full max-w-2xl">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 px-4 py-8 md:py-16">
+        <div className="mx-auto max-w-4xl">
+          {/* Header */}
+          <div className="text-center mb-8 md:mb-12">
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">
               Bienvenue{user?.name ? `, ${user.name}` : ''} !
-            </CardTitle>
-            <CardDescription>
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-xl mx-auto">
               Choisissez votre formule pour commencer à utiliser SOAP Notice.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-center text-muted-foreground">
-              Les plans de souscription seront disponibles prochainement.
+              Tous les plans incluent un essai gratuit de 7 jours.
             </p>
-            <div className="flex justify-center">
-              <Button asChild>
-                <a href="/">Continuer avec l'essai gratuit</a>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+
+          {/* Plans Grid */}
+          <PlanSelector
+            plans={plans}
+            selectedPlanId={selectedPlanId}
+            onSelectPlan={handleSelectPlan}
+            isLoading={isLoading}
+            isActivating={createTrial.isPending}
+            error={error?.message ?? null}
+          />
+
+          {/* Footer Note */}
+          <div className="mt-8 text-center text-sm text-muted-foreground">
+            <p>
+              Pas de carte bancaire requise pour l'essai gratuit.
+            </p>
+            <p className="mt-1">
+              Vous pouvez annuler à tout moment.
+            </p>
+          </div>
+        </div>
       </div>
     </ProtectedRoute>
   );

@@ -11,10 +11,14 @@ interface AuthState {
   isLoading: boolean;
   /** Whether user is authenticated */
   isAuthenticated: boolean;
+  /** Whether user has a subscription */
+  hasSubscription: boolean;
   /** Set the current user */
   setUser: (user: User | null) => void;
   /** Set loading state */
   setLoading: (loading: boolean) => void;
+  /** Set subscription status */
+  setHasSubscription: (hasSubscription: boolean) => void;
   /** Clear auth state (logout) */
   clearAuth: () => void;
 }
@@ -29,11 +33,13 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isLoading: true, // Start as loading to check auth on mount
   isAuthenticated: false,
+  hasSubscription: false,
 
   setUser: (user) =>
     set({
       user,
       isAuthenticated: user !== null,
+      hasSubscription: user?.hasSubscription ?? false,
       isLoading: false,
     }),
 
@@ -42,10 +48,16 @@ export const useAuthStore = create<AuthState>((set) => ({
       isLoading: loading,
     }),
 
+  setHasSubscription: (hasSubscription) =>
+    set({
+      hasSubscription,
+    }),
+
   clearAuth: () =>
     set({
       user: null,
       isAuthenticated: false,
+      hasSubscription: false,
       isLoading: false,
     }),
 }));

@@ -18,7 +18,7 @@ export const authQueryKey = ['auth', 'me'] as const;
  */
 export function useAuth() {
   const queryClient = useQueryClient();
-  const { user, isLoading, isAuthenticated, setUser, setLoading, clearAuth } =
+  const { user, isLoading, isAuthenticated, hasSubscription, setUser, setLoading, clearAuth } =
     useAuthStore();
 
   // Query current user on mount
@@ -78,6 +78,7 @@ export function useAuth() {
     user,
     isLoading: isLoading || isQueryLoading,
     isAuthenticated,
+    hasSubscription,
     error,
     logout,
     refresh,

@@ -70,12 +70,14 @@ class UserResponse(UserBase):
         name: User's display name
         avatar_url: URL to user's profile picture
         is_admin: Whether user has admin privileges
+        has_subscription: Whether user has any subscription
         created_at: When the user was created
         updated_at: When the user was last updated
     """
 
     id: UUID
     is_admin: bool = Field(..., alias="isAdmin")
+    has_subscription: bool = Field(False, alias="hasSubscription")
     created_at: datetime = Field(..., alias="createdAt")
     updated_at: datetime = Field(..., alias="updatedAt")
 
@@ -89,6 +91,7 @@ class UserResponse(UserBase):
                 "name": "Jean Dupont",
                 "avatarUrl": "https://example.com/avatar.jpg",
                 "isAdmin": False,
+                "hasSubscription": True,
                 "createdAt": "2026-01-22T10:30:00Z",
                 "updatedAt": "2026-01-22T10:30:00Z",
             }

@@ -10,7 +10,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.config import get_settings
 from app.core.exceptions import ApiException, api_exception_handler
-from app.routers import auth
+from app.routers import auth, plans, subscriptions
 
 settings = get_settings()
 
@@ -63,6 +63,8 @@ app.add_exception_handler(ApiException, api_exception_handler)
 
 # Routers
 app.include_router(auth.router, prefix="/api/v1")
+app.include_router(plans.router, prefix="/api/v1")
+app.include_router(subscriptions.router, prefix="/api/v1")
 
 
 @app.get("/health")
