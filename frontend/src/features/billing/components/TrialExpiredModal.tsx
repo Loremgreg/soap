@@ -2,6 +2,7 @@
  * Modal component displayed when user's trial has expired.
  */
 
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -26,28 +27,27 @@ interface TrialExpiredModalProps {
  * @param onUpgrade - Callback when user clicks upgrade button
  */
 export function TrialExpiredModal({ isOpen, onUpgrade }: TrialExpiredModalProps) {
+  const { t } = useTranslation('billing');
+
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
       <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader>
-          <DialogTitle>Votre période d'essai est terminée</DialogTitle>
+          <DialogTitle>{t('trialExpired.title')}</DialogTitle>
           <DialogDescription>
-            Votre essai gratuit de 7 jours est arrivé à son terme. Pour continuer
-            à utiliser SOAP Notice et générer des notes, veuillez souscrire à un
-            abonnement.
+            {t('trialExpired.description')}
           </DialogDescription>
         </DialogHeader>
         <div className="py-4">
           <div className="rounded-lg bg-muted p-4 text-center">
             <p className="text-sm text-muted-foreground">
-              Choisissez le plan qui vous convient et continuez à gagner du temps
-              sur vos comptes-rendus.
+              {t('trialExpired.cta')}
             </p>
           </div>
         </div>
         <DialogFooter>
           <Button onClick={onUpgrade} className="w-full min-h-[44px]">
-            Voir les plans
+            {t('trialExpired.viewPlans')}
           </Button>
         </DialogFooter>
       </DialogContent>

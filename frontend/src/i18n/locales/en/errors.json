@@ -1,0 +1,13 @@
+{
+  "generic": "An error occurred. Please try again.",
+  "network": "Connection error. Check your internet connection.",
+  "unauthorized": "You must be logged in to access this page.",
+  "forbidden": "You do not have permission to perform this action.",
+  "notFound": "The requested resource does not exist.",
+  "serverError": "Server error. Please try again later.",
+  "validation": "The entered data is invalid.",
+  "subscriptionExists": "You already have a subscription.",
+  "planNotFound": "The selected plan does not exist or is no longer available.",
+  "quotaExceeded": "Your monthly quota is exhausted.",
+  "subscriptionRequired": "A subscription is required to access this feature."
+}

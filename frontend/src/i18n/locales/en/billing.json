@@ -1,0 +1,39 @@
+{
+  "planSelection": {
+    "welcome": "Welcome{{name}}!",
+    "welcomeWithName": ", {{name}}",
+    "subtitle": "Choose your plan to start using SOAP Notice. All plans include a free 7-day trial.",
+    "noCreditCard": "No credit card required for the free trial.",
+    "cancelAnytime": "Cancel anytime."
+  },
+  "plan": {
+    "visitsPerMonth": "{{count}} visits/month",
+    "recordingUpTo": "Recording up to {{minutes}} min",
+    "notesRetention": "{{count}} notes retention",
+    "perMonth": "/month"
+  },
+  "trial": {
+    "badge": "7-day free trial",
+    "startTrial": "Start free trial",
+    "activating": "Activating...",
+    "activated": "Trial activated!",
+    "activatedDescription": "Your 7-day trial has started. Enjoy 5 free visits.",
+    "activationError": "Could not activate trial. Please try again."
+  },
+  "trialExpired": {
+    "title": "Your trial has ended",
+    "description": "Your free 7-day trial has expired. To continue using SOAP Notice and generate notes, please subscribe to a plan.",
+    "cta": "Choose the plan that suits you and continue saving time on your reports.",
+    "viewPlans": "View plans"
+  },
+  "subscription": {
+    "visitsRemaining": "{{remaining}}/{{total}} visits remaining",
+    "trialBadge": "Trial",
+    "quotaExhausted": "Quota exhausted",
+    "startRecording": "Start recording"
+  },
+  "errors": {
+    "loadPlansError": "An error occurred while loading plans.",
+    "noPlansAvailable": "No plans available at the moment."
+  }
+}

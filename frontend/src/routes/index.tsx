@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -12,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute';
 import { useAuth } from '@/features/auth';
 import { useSubscription, TrialExpiredModal } from '@/features/billing';
+import { LanguageSelector } from '@/components/LanguageSelector';
 
 /**
  * Home page route.
@@ -26,6 +28,8 @@ export const Route = createFileRoute('/')({
 });
 
 function HomePage() {
+  const { t } = useTranslation('home');
+  const { t: tCommon } = useTranslation('common');
   const navigate = useNavigate();
   const { user, hasSubscription, logout, isLoggingOut } = useAuth();
   const { data: subscription, isLoading: isLoadingSubscription } = useSubscription();
@@ -58,7 +62,7 @@ function HomePage() {
     return (
       <ProtectedRoute>
         <div className="flex min-h-screen items-center justify-center">
-          <div className="animate-pulse text-muted-foreground">Chargement...</div>
+          <div className="animate-pulse text-muted-foreground">{tCommon('loading')}</div>
         </div>
       </ProtectedRoute>
     );
@@ -67,13 +71,18 @@ function HomePage() {
   return (
     <ProtectedRoute>
       <div className="flex min-h-screen items-center justify-center p-4">
+        {/* Language Selector in top right */}
+        <div className="absolute top-4 right-4">
+          <LanguageSelector />
+        </div>
+
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">SOAP Notice</CardTitle>
+            <CardTitle className="text-2xl">{t('title')}</CardTitle>
             <CardDescription>
               {user?.name
-                ? `Bienvenue, ${user.name}!`
-                : 'Application de transcription audio pour physiothérapeutes'}
+                ? t('welcomeUser', { name: user.name })
+                : t('subtitle')}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
@@ -81,19 +90,21 @@ function HomePage() {
             {subscription && (
               <div className="flex items-center justify-center gap-2">
                 <Badge variant={subscription.quotaRemaining > 0 ? 'secondary' : 'destructive'}>
-                  {subscription.quotaRemaining}/{subscription.quotaTotal} visites restantes
+                  {t('visitsRemaining', {
+                    remaining: subscription.quotaRemaining,
+                    total: subscription.quotaTotal,
+                  })}
                 </Badge>
                 {subscription.status === 'trial' && (
                   <Badge variant="outline" className="text-emerald-600 border-emerald-300">
-                    Essai
+                    {t('trialBadge')}
                   </Badge>
                 )}
               </div>
             )}
 
             <p className="text-center text-muted-foreground">
-              Transformez vos enregistrements d'anamnèses en notes SOAP
-              structurées.
+              {t('description')}
             </p>
 
             <Button
@@ -101,8 +112,8 @@ function HomePage() {
               disabled={subscription?.canRecord === false}
             >
               {subscription?.canRecord === false
-                ? 'Quota épuisé'
-                : 'Commencer un enregistrement'}
+                ? t('quotaExhausted')
+                : t('startRecording')}
             </Button>
 
             <Button
@@ -111,7 +122,7 @@ function HomePage() {
               onClick={logout}
               disabled={isLoggingOut}
             >
-              {isLoggingOut ? 'Déconnexion...' : 'Se déconnecter'}
+              {isLoggingOut ? tCommon('loggingOut') : tCommon('logout')}
             </Button>
           </CardContent>
         </Card>

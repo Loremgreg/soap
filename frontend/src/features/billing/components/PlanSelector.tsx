@@ -2,6 +2,7 @@
  * Container component for plan selection with loading and error states.
  */
 
+import { useTranslation } from 'react-i18next';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { Plan } from '../types';
 import { PlanCard } from './PlanCard';
@@ -60,11 +61,13 @@ export function PlanSelector({
   isActivating,
   error,
 }: PlanSelectorProps) {
+  const { t } = useTranslation('billing');
+
   if (error) {
     return (
       <div className="text-center py-8">
         <p className="text-destructive font-medium">
-          Une erreur est survenue lors du chargement des plans.
+          {t('errors.loadPlansError')}
         </p>
         <p className="text-muted-foreground mt-2">{error}</p>
       </div>
@@ -84,7 +87,7 @@ export function PlanSelector({
     return (
       <div className="text-center py-8">
         <p className="text-muted-foreground">
-          Aucun plan disponible pour le moment.
+          {t('errors.noPlansAvailable')}
         </p>
       </div>
     );

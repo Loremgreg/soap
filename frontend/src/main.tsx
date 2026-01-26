@@ -6,6 +6,9 @@ import { queryClient } from '@/lib/queryClient';
 import { routeTree } from './routeTree.gen';
 import './index.css';
 
+// Initialize i18n (must be imported before any component that uses translations)
+import './i18n/config';
+
 // Create the router instance
 const router = createRouter({ routeTree });
 

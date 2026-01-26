@@ -4,6 +4,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { createTrialSubscription, getMySubscription } from '../api/subscriptions';
 import type { CreateTrialRequest, Subscription } from '../types';
 import { useToast } from '@/hooks/use-toast';
@@ -55,6 +56,8 @@ export function useCreateTrialSubscription() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation('billing');
+  const { t: tCommon } = useTranslation('common');
 
   return useMutation<Subscription, Error, CreateTrialRequest>({
     mutationFn: createTrialSubscription,
@@ -64,8 +67,8 @@ export function useCreateTrialSubscription() {
 
       // Show success toast
       toast({
-        title: 'Essai activé !',
-        description: 'Votre période d\'essai de 7 jours a commencé. Profitez de 5 visites gratuites.',
+        title: t('trial.activated'),
+        description: t('trial.activatedDescription'),
       });
 
       // Redirect to home
@@ -74,8 +77,8 @@ export function useCreateTrialSubscription() {
     onError: (error) => {
       toast({
         variant: 'destructive',
-        title: 'Erreur',
-        description: error.message || 'Impossible d\'activer l\'essai. Veuillez réessayer.',
+        title: tCommon('error'),
+        description: error.message || t('trial.activationError'),
       });
     },
   });

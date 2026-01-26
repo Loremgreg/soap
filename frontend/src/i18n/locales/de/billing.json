@@ -1,0 +1,39 @@
+{
+  "planSelection": {
+    "welcome": "Willkommen{{name}}!",
+    "welcomeWithName": ", {{name}}",
+    "subtitle": "Wählen Sie Ihren Plan, um SOAP Notice zu nutzen. Alle Pläne beinhalten eine kostenlose 7-Tage-Testversion.",
+    "noCreditCard": "Keine Kreditkarte für die Testversion erforderlich.",
+    "cancelAnytime": "Jederzeit kündbar."
+  },
+  "plan": {
+    "visitsPerMonth": "{{count}} Besuche/Monat",
+    "recordingUpTo": "Aufnahme bis zu {{minutes}} Min",
+    "notesRetention": "Speicherung von {{count}} Notizen",
+    "perMonth": "/Monat"
+  },
+  "trial": {
+    "badge": "7 Tage kostenlos testen",
+    "startTrial": "Kostenlose Testversion starten",
+    "activating": "Aktivierung...",
+    "activated": "Testversion aktiviert!",
+    "activatedDescription": "Ihre 7-tägige Testphase hat begonnen. Nutzen Sie 5 kostenlose Besuche.",
+    "activationError": "Testversion konnte nicht aktiviert werden. Bitte versuchen Sie es erneut."
+  },
+  "trialExpired": {
+    "title": "Ihre Testphase ist beendet",
+    "description": "Ihre kostenlose 7-tägige Testphase ist abgelaufen. Um SOAP Notice weiter zu nutzen und Notizen zu erstellen, abonnieren Sie bitte einen Plan.",
+    "cta": "Wählen Sie den passenden Plan und sparen Sie weiterhin Zeit bei Ihren Berichten.",
+    "viewPlans": "Pläne anzeigen"
+  },
+  "subscription": {
+    "visitsRemaining": "{{remaining}}/{{total}} Besuche übrig",
+    "trialBadge": "Testversion",
+    "quotaExhausted": "Kontingent erschöpft",
+    "startRecording": "Aufnahme starten"
+  },
+  "errors": {
+    "loadPlansError": "Beim Laden der Pläne ist ein Fehler aufgetreten.",
+    "noPlansAvailable": "Derzeit sind keine Pläne verfügbar."
+  }
+}

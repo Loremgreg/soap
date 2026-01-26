@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import {
   Card,
   CardContent,
@@ -10,6 +11,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '../hooks/useAuth';
 import { GoogleLoginButton } from '../components/GoogleLoginButton';
+import { LanguageSelector } from '@/components/LanguageSelector';
 import type { LoginSearchParams } from '@/routes/login';
 
 /**
@@ -20,6 +22,8 @@ import type { LoginSearchParams } from '@/routes/login';
  * Handles OAuth error messages via query params.
  */
 export function LoginPage() {
+  const { t } = useTranslation('auth');
+  const { t: tCommon } = useTranslation('common');
   const { toast } = useToast();
   const navigate = useNavigate();
   const { isAuthenticated, isLoading } = useAuth();
@@ -32,21 +36,21 @@ export function LoginPage() {
   useEffect(() => {
     if (error) {
       const errorMessages: Record<string, string> = {
-        OAUTH_FAILED: "L'authentification Google a échoué. Veuillez réessayer.",
-        OAUTH_CANCELLED: 'Authentification annulée.',
-        EMAIL_NOT_VERIFIED: "Votre adresse email n'est pas vérifiée par Google. Veuillez vérifier votre email.",
+        OAUTH_FAILED: t('errors.oauthFailed'),
+        OAUTH_CANCELLED: t('errors.oauthCancelled'),
+        EMAIL_NOT_VERIFIED: t('errors.emailNotVerified'),
       };
 
       toast({
         variant: 'destructive',
-        title: 'Erreur de connexion',
+        title: tCommon('error'),
         description: errorMessages[error] || errorDescription || error,
       });
 
       // Clear error from URL using TanStack Router
       navigate({ to: '/login', search: {}, replace: true });
     }
-  }, [error, errorDescription, toast, navigate]);
+  }, [error, errorDescription, toast, navigate, t, tCommon]);
 
   // Redirect to home if already authenticated
   useEffect(() => {
@@ -57,6 +61,11 @@ export function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4 bg-gradient-to-b from-background to-muted/30">
+      {/* Language Selector in top right */}
+      <div className="absolute top-4 right-4">
+        <LanguageSelector />
+      </div>
+
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-2">
           <div className="mx-auto mb-4">
@@ -65,28 +74,16 @@ export function LoginPage() {
               <span className="text-3xl">🩺</span>
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold">SOAP Notice</CardTitle>
+          <CardTitle className="text-2xl font-bold">{t('login.title')}</CardTitle>
           <CardDescription className="text-base">
-            Application de transcription audio pour physiothérapeutes
+            {t('login.subtitle')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <p className="text-center text-muted-foreground text-sm">
-            Connectez-vous pour accéder à vos notes et enregistrements.
-          </p>
-
           <GoogleLoginButton />
 
           <p className="text-center text-xs text-muted-foreground">
-            En vous connectant, vous acceptez nos{' '}
-            <a href="/terms" className="underline hover:text-primary">
-              conditions d'utilisation
-            </a>{' '}
-            et notre{' '}
-            <a href="/privacy" className="underline hover:text-primary">
-              politique de confidentialité
-            </a>
-            .
+            {t('login.termsNotice')}
           </p>
         </CardContent>
       </Card>

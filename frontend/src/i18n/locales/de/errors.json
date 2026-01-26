@@ -1,0 +1,13 @@
+{
+  "generic": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+  "network": "Verbindungsfehler. Überprüfen Sie Ihre Internetverbindung.",
+  "unauthorized": "Sie müssen angemeldet sein, um auf diese Seite zuzugreifen.",
+  "forbidden": "Sie haben keine Berechtigung für diese Aktion.",
+  "notFound": "Die angeforderte Ressource existiert nicht.",
+  "serverError": "Serverfehler. Bitte versuchen Sie es später erneut.",
+  "validation": "Die eingegebenen Daten sind ungültig.",
+  "subscriptionExists": "Sie haben bereits ein Abonnement.",
+  "planNotFound": "Der ausgewählte Plan existiert nicht oder ist nicht mehr verfügbar.",
+  "quotaExceeded": "Ihr monatliches Kontingent ist erschöpft.",
+  "subscriptionRequired": "Ein Abonnement ist erforderlich, um auf diese Funktion zuzugreifen."
+}

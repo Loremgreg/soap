@@ -1,0 +1,19 @@
+{
+  "appName": "SOAP Notice",
+  "loading": "Laden...",
+  "error": "Fehler",
+  "retry": "Erneut versuchen",
+  "cancel": "Abbrechen",
+  "confirm": "Bestätigen",
+  "save": "Speichern",
+  "delete": "Löschen",
+  "edit": "Bearbeiten",
+  "close": "Schließen",
+  "back": "Zurück",
+  "next": "Weiter",
+  "yes": "Ja",
+  "no": "Nein",
+  "logout": "Abmelden",
+  "loggingOut": "Abmelden...",
+  "language": "Sprache"
+}

@@ -1,0 +1,10 @@
+{
+  "title": "SOAP Notice",
+  "welcomeUser": "Willkommen, {{name}}!",
+  "subtitle": "Audio-Transkriptionsanwendung für Physiotherapeuten",
+  "description": "Verwandeln Sie Ihre Anamnese-Aufnahmen in strukturierte SOAP-Notizen.",
+  "startRecording": "Aufnahme starten",
+  "quotaExhausted": "Kontingent erschöpft",
+  "visitsRemaining": "{{remaining}}/{{total}} Besuche übrig",
+  "trialBadge": "Testversion"
+}

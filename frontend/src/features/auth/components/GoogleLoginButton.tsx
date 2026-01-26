@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
@@ -25,6 +26,9 @@ export function GoogleLoginButton({
   isLoading = false,
   className,
 }: GoogleLoginButtonProps) {
+  const { t } = useTranslation('auth');
+  const { t: tCommon } = useTranslation('common');
+
   /**
    * Handles click by redirecting to Google OAuth endpoint.
    */
@@ -75,7 +79,7 @@ export function GoogleLoginButton({
         />
       </svg>
       <span>
-        {isLoading ? 'Connexion en cours...' : 'Continuer avec Google'}
+        {isLoading ? tCommon('loading') : t('login.continueWithGoogle')}
       </span>
     </Button>
   );

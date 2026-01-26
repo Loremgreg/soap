@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute';
 import { useAuth } from '@/features/auth';
 import {
@@ -7,6 +8,7 @@ import {
   usePlans,
   useCreateTrialSubscription,
 } from '@/features/billing';
+import { LanguageSelector } from '@/components/LanguageSelector';
 
 /**
  * Plan selection page route.
@@ -19,6 +21,7 @@ export const Route = createFileRoute('/plan-selection')({
 });
 
 function PlanSelectionPage() {
+  const { t } = useTranslation('billing');
   const { user } = useAuth();
   const { data: plans = [], isLoading, error } = usePlans();
   const createTrial = useCreateTrialSubscription();
@@ -37,15 +40,19 @@ function PlanSelectionPage() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 px-4 py-8 md:py-16">
+        {/* Language Selector in top right */}
+        <div className="absolute top-4 right-4">
+          <LanguageSelector />
+        </div>
+
         <div className="mx-auto max-w-4xl">
           {/* Header */}
           <div className="text-center mb-8 md:mb-12">
             <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">
-              Bienvenue{user?.name ? `, ${user.name}` : ''} !
+              {t('planSelection.welcome', { name: user?.name ? t('planSelection.welcomeWithName', { name: user.name }) : '' })}
             </h1>
             <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-              Choisissez votre formule pour commencer à utiliser SOAP Notice.
-              Tous les plans incluent un essai gratuit de 7 jours.
+              {t('planSelection.subtitle')}
             </p>
           </div>
 
@@ -62,10 +69,10 @@ function PlanSelectionPage() {
           {/* Footer Note */}
           <div className="mt-8 text-center text-sm text-muted-foreground">
             <p>
-              Pas de carte bancaire requise pour l'essai gratuit.
+              {t('planSelection.noCreditCard')}
             </p>
             <p className="mt-1">
-              Vous pouvez annuler à tout moment.
+              {t('planSelection.cancelAnytime')}
             </p>
           </div>
         </div>

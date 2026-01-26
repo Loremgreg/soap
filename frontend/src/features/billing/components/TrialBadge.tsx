@@ -1,7 +1,8 @@
 /**
- * Badge component displaying "Essai gratuit 7 jours" for trial period.
+ * Badge component displaying trial period text.
  */
 
+import { useTranslation } from 'react-i18next';
 import { Badge } from '@/components/ui/badge';
 
 interface TrialBadgeProps {
@@ -14,12 +15,14 @@ interface TrialBadgeProps {
  * @param className - Additional CSS classes
  */
 export function TrialBadge({ className }: TrialBadgeProps) {
+  const { t } = useTranslation('billing');
+
   return (
     <Badge
       variant="secondary"
       className={`bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-emerald-200 ${className ?? ''}`}
     >
-      Essai gratuit 7 jours
+      {t('trial.badge')}
     </Badge>
   );
 }

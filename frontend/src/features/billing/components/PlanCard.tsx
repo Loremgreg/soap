@@ -2,6 +2,7 @@
  * Card component displaying a subscription plan with its details.
  */
 
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -11,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { formatPrice } from '@/lib/formatters';
 import type { Plan } from '../types';
 import { TrialBadge } from './TrialBadge';
 
@@ -26,24 +28,13 @@ interface PlanCardProps {
 }
 
 /**
- * Formats price from cents to display format.
- *
- * @param cents - Price in cents (e.g., 2900)
- * @returns Formatted price string (e.g., "29€/mois")
- */
-function formatPrice(cents: number): string {
-  const euros = cents / 100;
-  return `${euros}€/mois`;
-}
-
-/**
  * Displays a single subscription plan with its details.
  *
  * Features:
  * - Plan name and price prominently displayed
  * - Quota information (visits/month)
- * - "Essai gratuit 7 jours" badge
- * - "Démarrer l'essai gratuit" button with loading state
+ * - Trial badge
+ * - Start trial button with loading state
  * - Selected state visual highlight
  * - Mobile-optimized with min 44x44px touch targets
  *
@@ -58,6 +49,8 @@ export function PlanCard({
   onSelect,
   isLoading,
 }: PlanCardProps) {
+  const { t, i18n } = useTranslation('billing');
+
   return (
     <Card
       className={`relative transition-all ${
@@ -72,16 +65,16 @@ export function PlanCard({
         </div>
         <CardTitle className="text-2xl">{plan.displayName}</CardTitle>
         <CardDescription className="text-3xl font-bold text-foreground mt-2">
-          {formatPrice(plan.priceMonthly)}
+          {formatPrice(plan.priceMonthly, i18n.language)}{t('plan.perMonth')}
         </CardDescription>
       </CardHeader>
       <CardContent className="text-center">
         <div className="space-y-2 text-muted-foreground">
           <p className="text-lg font-medium text-foreground">
-            {plan.quotaMonthly} visites/mois
+            {t('plan.visitsPerMonth', { count: plan.quotaMonthly })}
           </p>
-          <p>Enregistrement jusqu'à {plan.maxRecordingMinutes} min</p>
-          <p>Conservation de {plan.maxNotesRetention} notes</p>
+          <p>{t('plan.recordingUpTo', { minutes: plan.maxRecordingMinutes })}</p>
+          <p>{t('plan.notesRetention', { count: plan.maxNotesRetention })}</p>
         </div>
       </CardContent>
       <CardFooter className="pt-4">
@@ -94,10 +87,10 @@ export function PlanCard({
           {isLoading ? (
             <span className="flex items-center gap-2">
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-              Activation...
+              {t('trial.activating')}
             </span>
           ) : (
-            "Démarrer l'essai gratuit"
+            t('trial.startTrial')
           )}
         </Button>
       </CardFooter>

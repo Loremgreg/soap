@@ -1,0 +1,13 @@
+{
+  "generic": "Une erreur est survenue. Veuillez réessayer.",
+  "network": "Erreur de connexion. Vérifiez votre connexion internet.",
+  "unauthorized": "Vous devez être connecté pour accéder à cette page.",
+  "forbidden": "Vous n'avez pas les droits pour effectuer cette action.",
+  "notFound": "La ressource demandée n'existe pas.",
+  "serverError": "Erreur serveur. Veuillez réessayer plus tard.",
+  "validation": "Les données saisies sont invalides.",
+  "subscriptionExists": "Vous avez déjà un abonnement.",
+  "planNotFound": "Le plan sélectionné n'existe pas ou n'est plus disponible.",
+  "quotaExceeded": "Votre quota mensuel est épuisé.",
+  "subscriptionRequired": "Un abonnement est requis pour accéder à cette fonctionnalité."
+}

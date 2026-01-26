@@ -1,0 +1,39 @@
+{
+  "planSelection": {
+    "welcome": "Bienvenue{{name}} !",
+    "welcomeWithName": ", {{name}}",
+    "subtitle": "Choisissez votre formule pour commencer à utiliser SOAP Notice. Tous les plans incluent un essai gratuit de 7 jours.",
+    "noCreditCard": "Pas de carte bancaire requise pour l'essai gratuit.",
+    "cancelAnytime": "Vous pouvez annuler à tout moment."
+  },
+  "plan": {
+    "visitsPerMonth": "{{count}} visites/mois",
+    "recordingUpTo": "Enregistrement jusqu'à {{minutes}} min",
+    "notesRetention": "Conservation de {{count}} notes",
+    "perMonth": "/mois"
+  },
+  "trial": {
+    "badge": "Essai gratuit 7 jours",
+    "startTrial": "Démarrer l'essai gratuit",
+    "activating": "Activation...",
+    "activated": "Essai activé !",
+    "activatedDescription": "Votre période d'essai de 7 jours a commencé. Profitez de 5 visites gratuites.",
+    "activationError": "Impossible d'activer l'essai. Veuillez réessayer."
+  },
+  "trialExpired": {
+    "title": "Votre période d'essai est terminée",
+    "description": "Votre essai gratuit de 7 jours est arrivé à son terme. Pour continuer à utiliser SOAP Notice et générer des notes, veuillez souscrire à un abonnement.",
+    "cta": "Choisissez le plan qui vous convient et continuez à gagner du temps sur vos comptes-rendus.",
+    "viewPlans": "Voir les plans"
+  },
+  "subscription": {
+    "visitsRemaining": "{{remaining}}/{{total}} visites restantes",
+    "trialBadge": "Essai",
+    "quotaExhausted": "Quota épuisé",
+    "startRecording": "Commencer un enregistrement"
+  },
+  "errors": {
+    "loadPlansError": "Une erreur est survenue lors du chargement des plans.",
+    "noPlansAvailable": "Aucun plan disponible pour le moment."
+  }
+}

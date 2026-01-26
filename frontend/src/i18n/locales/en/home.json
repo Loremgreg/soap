@@ -1,0 +1,10 @@
+{
+  "title": "SOAP Notice",
+  "welcomeUser": "Welcome, {{name}}!",
+  "subtitle": "Audio transcription app for physiotherapists",
+  "description": "Transform your anamnesis recordings into structured SOAP notes.",
+  "startRecording": "Start recording",
+  "quotaExhausted": "Quota exhausted",
+  "visitsRemaining": "{{remaining}}/{{total}} visits remaining",
+  "trialBadge": "Trial"
+}
