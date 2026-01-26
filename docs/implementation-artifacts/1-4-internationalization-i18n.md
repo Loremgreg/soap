@@ -1,6 +1,6 @@
 # Story 1.4: Internationalisation (FR/DE/EN)
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

@@ -1,19 +1,12 @@
 import { useEffect, useState } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
+import { Mic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute';
 import { useAuth } from '@/features/auth';
 import { useSubscription, TrialExpiredModal } from '@/features/billing';
-import { LanguageSelector } from '@/components/LanguageSelector';
+import { AppShell, PageContainer } from '@/components/layout';
 
 /**
  * Home page route.
@@ -31,7 +24,7 @@ function HomePage() {
   const { t } = useTranslation('home');
   const { t: tCommon } = useTranslation('common');
   const navigate = useNavigate();
-  const { user, hasSubscription, logout, isLoggingOut } = useAuth();
+  const { user, hasSubscription } = useAuth();
   const { data: subscription, isLoading: isLoadingSubscription } = useSubscription();
   const [showExpiredModal, setShowExpiredModal] = useState(false);
 
@@ -61,72 +54,50 @@ function HomePage() {
   if (isLoadingSubscription) {
     return (
       <ProtectedRoute>
-        <div className="flex min-h-screen items-center justify-center">
-          <div className="animate-pulse text-muted-foreground">{tCommon('loading')}</div>
-        </div>
+        <AppShell>
+          <PageContainer className="flex min-h-[60vh] items-center justify-center">
+            <div className="animate-pulse text-muted-foreground">{tCommon('loading')}</div>
+          </PageContainer>
+        </AppShell>
       </ProtectedRoute>
     );
   }
 
   return (
     <ProtectedRoute>
-      <div className="flex min-h-screen items-center justify-center p-4">
-        {/* Language Selector in top right */}
-        <div className="absolute top-4 right-4">
-          <LanguageSelector />
-        </div>
-
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">{t('title')}</CardTitle>
-            <CardDescription>
+      <AppShell>
+        <PageContainer className="flex flex-col items-center justify-center py-8">
+          {/* Welcome message */}
+          <div className="mb-8 text-center">
+            <h2 className="text-xl font-medium text-muted-foreground">
               {user?.name
                 ? t('welcomeUser', { name: user.name })
                 : t('subtitle')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4">
-            {/* Quota Display */}
-            {subscription && (
-              <div className="flex items-center justify-center gap-2">
-                <Badge variant={subscription.quotaRemaining > 0 ? 'secondary' : 'destructive'}>
-                  {t('visitsRemaining', {
-                    remaining: subscription.quotaRemaining,
-                    total: subscription.quotaTotal,
-                  })}
-                </Badge>
-                {subscription.status === 'trial' && (
-                  <Badge variant="outline" className="text-emerald-600 border-emerald-300">
-                    {t('trialBadge')}
-                  </Badge>
-                )}
-              </div>
-            )}
+            </h2>
+          </div>
 
-            <p className="text-center text-muted-foreground">
-              {t('description')}
-            </p>
-
+          {/* Record Button - Large centered button */}
+          <div className="flex flex-col items-center gap-4">
             <Button
-              className="w-full min-h-[44px]"
+              size="lg"
+              className="h-20 w-20 rounded-full"
               disabled={subscription?.canRecord === false}
             >
+              <Mic className="h-8 w-8" />
+            </Button>
+            <p className="text-sm text-muted-foreground">
               {subscription?.canRecord === false
                 ? t('quotaExhausted')
                 : t('startRecording')}
-            </Button>
+            </p>
+          </div>
 
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={logout}
-              disabled={isLoggingOut}
-            >
-              {isLoggingOut ? tCommon('loggingOut') : tCommon('logout')}
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+          {/* Description */}
+          <p className="mt-8 max-w-xs text-center text-sm text-muted-foreground">
+            {t('description')}
+          </p>
+        </PageContainer>
+      </AppShell>
 
       {/* Trial Expired Modal */}
       <TrialExpiredModal

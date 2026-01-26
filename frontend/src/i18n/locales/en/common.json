@@ -15,5 +15,23 @@
   "no": "No",
   "logout": "Log out",
   "loggingOut": "Logging out...",
-  "language": "Language"
+  "language": "Language",
+  "nav": {
+    "home": "Home",
+    "history": "History",
+    "settings": "Settings"
+  },
+  "quota": {
+    "remaining": "{{remaining}}/{{total}} visits",
+    "exhausted": "Quota exhausted"
+  },
+  "history": {
+    "title": "History",
+    "empty": "No notes yet",
+    "emptyAction": "Record your first consultation"
+  },
+  "settings": {
+    "title": "Settings",
+    "languageSection": "App Language"
+  }
 }

@@ -15,5 +15,23 @@
   "no": "Nein",
   "logout": "Abmelden",
   "loggingOut": "Abmelden...",
-  "language": "Sprache"
+  "language": "Sprache",
+  "nav": {
+    "home": "Startseite",
+    "history": "Verlauf",
+    "settings": "Einstellungen"
+  },
+  "quota": {
+    "remaining": "{{remaining}}/{{total}} Besuche",
+    "exhausted": "Kontingent erschöpft"
+  },
+  "history": {
+    "title": "Verlauf",
+    "empty": "Noch keine Notizen",
+    "emptyAction": "Zeichnen Sie Ihre erste Konsultation auf"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "languageSection": "App-Sprache"
+  }
 }

@@ -43,18 +43,18 @@ development_status:
   # ═══════════════════════════════════════════════════════════════════
   # Epic 1: Authentification & Onboarding
   # ═══════════════════════════════════════════════════════════════════
-  epic-1: in-progress
+  epic-1: done
   1-1-project-setup-infrastructure: done
   1-2-oauth-google-login: done
   1-3-plan-selection-trial-activation: done
-  1-4-internationalization-i18n: ready-for-dev
+  1-4-internationalization-i18n: done
   epic-1-retrospective: optional
 
   # ═══════════════════════════════════════════════════════════════════
   # Epic 2: Enregistrement Audio
   # ═══════════════════════════════════════════════════════════════════
-  epic-2: backlog
-  2-1-mobile-pwa-shell-navigation: backlog
+  epic-2: in-progress
+  2-1-mobile-pwa-shell-navigation: done
   2-2-audio-recording-interface: backlog
   2-3-deepgram-streaming-integration: backlog
   epic-2-retrospective: optional

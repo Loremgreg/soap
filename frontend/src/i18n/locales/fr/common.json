@@ -15,5 +15,23 @@
   "no": "Non",
   "logout": "Se déconnecter",
   "loggingOut": "Déconnexion...",
-  "language": "Langue"
+  "language": "Langue",
+  "nav": {
+    "home": "Accueil",
+    "history": "Historique",
+    "settings": "Paramètres"
+  },
+  "quota": {
+    "remaining": "{{remaining}}/{{total}} visites",
+    "exhausted": "Quota épuisé"
+  },
+  "history": {
+    "title": "Historique",
+    "empty": "Aucune note pour l'instant",
+    "emptyAction": "Enregistrez votre première consultation"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "languageSection": "Langue de l'application"
+  }
 }
