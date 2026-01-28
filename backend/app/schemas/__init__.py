@@ -1,6 +1,11 @@
 """Pydantic schemas for request/response validation."""
 
 from app.schemas.plan import PlanList, PlanResponse, PlanSummary
+from app.schemas.recording import (
+    RecordingCreate,
+    RecordingResponse,
+    RecordingStatus,
+)
 from app.schemas.subscription import (
     SubscriptionCreate,
     SubscriptionResponse,
@@ -17,6 +22,9 @@ __all__ = [
     "PlanResponse",
     "PlanSummary",
     "PlanList",
+    "RecordingCreate",
+    "RecordingResponse",
+    "RecordingStatus",
     "SubscriptionCreate",
     "SubscriptionResponse",
     "SubscriptionStatus",

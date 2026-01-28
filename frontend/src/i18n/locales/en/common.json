@@ -33,5 +33,20 @@
   "settings": {
     "title": "Settings",
     "languageSection": "App Language"
+  },
+  "recording": {
+    "start": "Record",
+    "stop": "Stop",
+    "pause": "Pause",
+    "resume": "Resume",
+    "recording": "Recording...",
+    "processing": "Processing...",
+    "permissionDenied": "Microphone access denied",
+    "permissionInstructions": "Enable the microphone in your browser settings",
+    "warningMaxDuration": "Recording will stop in 30 seconds",
+    "limitReached": "Recording limit reached",
+    "connectionLost": "Connection lost - recording locally",
+    "wakeLockUnavailable": "Screen may lock during recording",
+    "error": "Recording error"
   }
 }

@@ -33,5 +33,20 @@
   "settings": {
     "title": "Paramètres",
     "languageSection": "Langue de l'application"
+  },
+  "recording": {
+    "start": "Enregistrer",
+    "stop": "Arrêter",
+    "pause": "Pause",
+    "resume": "Reprendre",
+    "recording": "En cours...",
+    "processing": "Traitement en cours...",
+    "permissionDenied": "Accès au microphone refusé",
+    "permissionInstructions": "Activez le microphone dans les paramètres de votre navigateur",
+    "warningMaxDuration": "L'enregistrement s'arrêtera dans 30 secondes",
+    "limitReached": "Limite d'enregistrement atteinte",
+    "connectionLost": "Connexion perdue - enregistrement local en cours",
+    "wakeLockUnavailable": "L'écran pourrait se verrouiller pendant l'enregistrement",
+    "error": "Erreur lors de l'enregistrement"
   }
 }

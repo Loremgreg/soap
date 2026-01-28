@@ -68,3 +68,19 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
+
+/* Recording pulse animation */
+@keyframes recording-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+.recording-pulse {
+  animation: recording-pulse 2s ease-in-out infinite;
+}

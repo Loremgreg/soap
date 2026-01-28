@@ -33,5 +33,20 @@
   "settings": {
     "title": "Einstellungen",
     "languageSection": "App-Sprache"
+  },
+  "recording": {
+    "start": "Aufnehmen",
+    "stop": "Stoppen",
+    "pause": "Pause",
+    "resume": "Fortsetzen",
+    "recording": "Aufnahme läuft...",
+    "processing": "Verarbeitung...",
+    "permissionDenied": "Mikrofonzugriff verweigert",
+    "permissionInstructions": "Aktivieren Sie das Mikrofon in den Browsereinstellungen",
+    "warningMaxDuration": "Die Aufnahme wird in 30 Sekunden beendet",
+    "limitReached": "Aufnahmelimit erreicht",
+    "connectionLost": "Verbindung verloren - lokale Aufnahme läuft",
+    "wakeLockUnavailable": "Der Bildschirm könnte sich während der Aufnahme sperren",
+    "error": "Fehler bei der Aufnahme"
   }
 }

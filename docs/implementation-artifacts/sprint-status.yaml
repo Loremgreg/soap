@@ -55,7 +55,7 @@ development_status:
   # ═══════════════════════════════════════════════════════════════════
   epic-2: in-progress
   2-1-mobile-pwa-shell-navigation: done
-  2-2-audio-recording-interface: backlog
+  2-2-audio-recording-interface: review
   2-3-deepgram-streaming-integration: backlog
   epic-2-retrospective: optional
 
