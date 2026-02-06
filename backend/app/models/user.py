@@ -68,6 +68,13 @@ class User(Base, TimestampMixin):
         lazy="selectin",
     )
 
+    # Relationship to recordings (one-to-many)
+    recordings: Mapped[list["Recording"]] = relationship(
+        "Recording",
+        back_populates="user",
+        lazy="selectin",
+    )
+
     # Explicit indexes for performance (also defined via unique=True above)
     __table_args__ = (
         Index("idx_users_google_id", "google_id"),
@@ -80,4 +87,5 @@ class User(Base, TimestampMixin):
 
 
 # Import for type hints - avoid circular import
+from app.models.recording import Recording  # noqa: E402, F401
 from app.models.subscription import Subscription  # noqa: E402, F401

@@ -3,12 +3,14 @@
 import io
 import uuid
 from datetime import datetime, timedelta, timezone
+from unittest.mock import MagicMock, patch
 
 import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.plan import Plan
+from app.models.recording import Recording
 from app.models.subscription import Subscription, SubscriptionStatus
 from app.models.user import User
 from app.routers.recordings import (
@@ -16,7 +18,10 @@ from app.routers.recordings import (
     AudioTooLongException,
     InvalidAudioTypeException,
     MAX_RECORDING_SECONDS,
+    TranscriptionFailedException,
 )
+from app.schemas.recording import RecordingStatus
+from app.services.deepgram import DeepgramTranscriptionError, TranscriptionResult
 
 
 class TestRecordingsConstants:
@@ -55,6 +60,13 @@ class TestRecordingsConstants:
         exc = InvalidAudioTypeException(content_type=None)
         assert exc.status_code == 415
         assert exc.details["contentType"] is None
+
+    def test_transcription_failed_exception(self) -> None:
+        """Test TranscriptionFailedException structure."""
+        exc = TranscriptionFailedException(reason="Deepgram timeout")
+        assert exc.status_code == 500
+        assert exc.code == "TRANSCRIPTION_FAILED"
+        assert exc.details["reason"] == "Deepgram timeout"
 
 
 class TestRecordingsEndpointAuth:
@@ -218,3 +230,135 @@ class TestDurationValidation:
         """Test duration exceeding limit."""
         duration = 700  # 11+ minutes
         assert duration > MAX_RECORDING_SECONDS
+
+
+class TestRecordingModel:
+    """Tests for Recording model."""
+
+    @pytest.fixture
+    async def test_user(self, db_session: AsyncSession) -> User:
+        """Create a test user."""
+        user = User(
+            google_id=f"google_{uuid.uuid4().hex[:8]}",
+            email=f"test_{uuid.uuid4().hex[:8]}@example.com",
+            name="Test User",
+        )
+        db_session.add(user)
+        await db_session.commit()
+        await db_session.refresh(user)
+        return user
+
+    @pytest.mark.asyncio
+    async def test_create_recording(
+        self, db_session: AsyncSession, test_user: User
+    ) -> None:
+        """Test creating a recording model."""
+        recording = Recording(
+            user_id=test_user.id,
+            duration_seconds=180,
+            language_detected="fr",
+            transcript_text="Test transcript content",
+            status=RecordingStatus.COMPLETED.value,
+        )
+        db_session.add(recording)
+        await db_session.commit()
+        await db_session.refresh(recording)
+
+        assert recording.id is not None
+        assert recording.user_id == test_user.id
+        assert recording.duration_seconds == 180
+        assert recording.language_detected == "fr"
+        assert recording.transcript_text == "Test transcript content"
+        assert recording.status == "completed"
+        assert recording.created_at is not None
+
+    @pytest.mark.asyncio
+    async def test_recording_without_transcript(
+        self, db_session: AsyncSession, test_user: User
+    ) -> None:
+        """Test recording with null transcript (failed transcription)."""
+        recording = Recording(
+            user_id=test_user.id,
+            duration_seconds=60,
+            status=RecordingStatus.FAILED.value,
+        )
+        db_session.add(recording)
+        await db_session.commit()
+        await db_session.refresh(recording)
+
+        assert recording.transcript_text is None
+        assert recording.language_detected is None
+        assert recording.status == "failed"
+
+    @pytest.mark.asyncio
+    async def test_recording_user_relationship(
+        self, db_session: AsyncSession, test_user: User
+    ) -> None:
+        """Test recording-user relationship."""
+        recording = Recording(
+            user_id=test_user.id,
+            duration_seconds=120,
+            status=RecordingStatus.PROCESSING.value,
+        )
+        db_session.add(recording)
+        await db_session.commit()
+        await db_session.refresh(recording)
+        await db_session.refresh(test_user)
+
+        # Verify relationship
+        assert recording.user.id == test_user.id
+        assert len(test_user.recordings) == 1
+        assert test_user.recordings[0].id == recording.id
+
+    @pytest.mark.asyncio
+    async def test_recording_status_transitions(
+        self, db_session: AsyncSession, test_user: User
+    ) -> None:
+        """Test recording status can be updated."""
+        recording = Recording(
+            user_id=test_user.id,
+            duration_seconds=90,
+            status=RecordingStatus.TRANSCRIBING.value,
+        )
+        db_session.add(recording)
+        await db_session.commit()
+
+        # Update status
+        recording.status = RecordingStatus.COMPLETED.value
+        recording.transcript_text = "Transcribed text"
+        await db_session.commit()
+        await db_session.refresh(recording)
+
+        assert recording.status == "completed"
+        assert recording.transcript_text == "Transcribed text"
+
+
+class TestTranscriptionIntegration:
+    """Tests for transcription integration with Deepgram."""
+
+    def test_transcription_result_structure(self) -> None:
+        """Test TranscriptionResult has expected structure."""
+        result = TranscriptionResult(
+            transcript="Le patient présente des douleurs lombaires.",
+            language_detected="fr",
+            duration_seconds=30.5,
+            latency_ms=1500.0,
+        )
+        assert result.transcript == "Le patient présente des douleurs lombaires."
+        assert result.language_detected == "fr"
+        assert result.duration_seconds == 30.5
+        assert result.latency_ms == 1500.0
+
+    def test_deepgram_transcription_error(self) -> None:
+        """Test DeepgramTranscriptionError exception."""
+        error = DeepgramTranscriptionError("Connection failed")
+        assert str(error) == "Connection failed"
+        assert isinstance(error, Exception)
+
+    def test_recording_status_enum_values(self) -> None:
+        """Test RecordingStatus enum has expected values."""
+        assert RecordingStatus.UPLOADED.value == "uploaded"
+        assert RecordingStatus.PROCESSING.value == "processing"
+        assert RecordingStatus.TRANSCRIBING.value == "transcribing"
+        assert RecordingStatus.COMPLETED.value == "completed"
+        assert RecordingStatus.FAILED.value == "failed"

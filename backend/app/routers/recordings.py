@@ -1,7 +1,7 @@
 """Recordings router for audio upload and processing endpoints."""
 
-import uuid
-from datetime import datetime, timezone
+import logging
+import time
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, File, Form, UploadFile
@@ -10,9 +10,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from app.core.dependencies import get_current_user
 from app.core.exceptions import ApiException, QuotaExceededException
+from app.models.recording import Recording
 from app.models.user import User
-from app.schemas.recording import RecordingResponse, RecordingStatus
+from app.schemas.recording import RecordingStatus, RecordingWithTranscript
 from app.services import subscription as subscription_service
+from app.services.deepgram import (
+    DeepgramTranscriptionError,
+    transcribe_audio,
+)
+
+logger = logging.getLogger(__name__)
 
 # Valid MIME types for audio uploads
 ALLOWED_AUDIO_TYPES = {
@@ -70,7 +77,25 @@ class InvalidAudioTypeException(ApiException):
         )
 
 
-@router.post("", response_model=RecordingResponse, status_code=201)
+class TranscriptionFailedException(ApiException):
+    """500 Transcription Failed exception."""
+
+    def __init__(self, reason: str) -> None:
+        """
+        Initialize transcription failed exception.
+
+        Args:
+            reason: Description of why transcription failed
+        """
+        super().__init__(
+            500,
+            "TRANSCRIPTION_FAILED",
+            "La transcription a échoué",
+            {"reason": reason},
+        )
+
+
+@router.post("", response_model=RecordingWithTranscript, status_code=201)
 async def create_recording(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -79,33 +104,35 @@ async def create_recording(
     language_detected: Annotated[
         str | None, Form(max_length=10, description="Detected language code")
     ] = None,
-) -> RecordingResponse:
+) -> RecordingWithTranscript:
     """
-    Upload an audio recording for processing.
+    Upload an audio recording for transcription.
 
-    Accepts a WebM/Opus audio file and validates:
-    - User has remaining quota
-    - Duration is within plan limits
-    - Trial is not expired
-
-    The audio will be processed asynchronously for transcription
-    (Story 2.3) and SOAP note generation (Story 3.1).
+    Accepts a WebM/Opus audio file and:
+    1. Validates user quota and trial status
+    2. Validates audio format and duration
+    3. Sends audio to Deepgram pre-recorded API for transcription
+    4. Stores transcript in database (audio is NOT stored - RGPD)
+    5. Decrements quota only on successful transcription
+    6. Returns recording with transcript
 
     Args:
         current_user: The authenticated user
         db: Database session
         audio: The audio file (WebM/Opus format)
         duration: Duration of the recording in seconds
-        language_detected: Optional detected language code
+        language_detected: Optional detected language code (overridden by Deepgram)
 
     Returns:
-        Recording ID, status, and creation timestamp
+        Recording with transcript, status, and metadata
 
     Raises:
         QuotaExceededException: If user has no remaining quota
         AudioTooLongException: If duration exceeds plan limits
-        TrialExpiredException: If user's trial has expired
+        TranscriptionFailedException: If Deepgram transcription fails
     """
+    start_time = time.time()
+
     # Get user's subscription and check quota
     subscription = await subscription_service.get_user_subscription(
         db=db,
@@ -156,25 +183,81 @@ async def create_recording(
     else:
         raise InvalidAudioTypeException(None)
 
-    # Generate recording ID
-    recording_id = f"rec_{uuid.uuid4().hex[:12]}"
-
-    # Read audio data (but don't store permanently - RGPD compliance)
-    # In Story 2.3, this will be sent to Deepgram for transcription
+    # Read audio data into memory (RGPD: never persisted to disk)
     audio_data = await audio.read()
-    _ = len(audio_data)  # Audio size tracked for future processing
 
-    # Decrement quota
-    subscription.quota_remaining -= 1
+    # Create recording record with TRANSCRIBING status (before transcription)
+    recording = Recording(
+        user_id=current_user.id,
+        duration_seconds=duration,
+        language_detected=language_detected,
+        status=RecordingStatus.TRANSCRIBING.value,
+    )
+    db.add(recording)
     await db.commit()
+    await db.refresh(recording)
 
-    # TODO: Story 2.3 - Send to Deepgram for transcription
+    # Transcribe audio with Deepgram
+    try:
+        result = await transcribe_audio(audio_data)
+
+        # Success: update recording with transcript AND decrement quota atomically
+        recording.transcript_text = result.transcript
+        recording.language_detected = result.language_detected or language_detected
+        recording.status = RecordingStatus.COMPLETED.value
+        subscription.quota_remaining -= 1
+        await db.commit()
+        await db.refresh(recording)
+
+        # Log latency for monitoring
+        total_latency_ms = (time.time() - start_time) * 1000
+        logger.info(
+            "Recording processed successfully",
+            extra={
+                "recording_id": str(recording.id),
+                "user_id": str(current_user.id),
+                "duration_seconds": duration,
+                "transcription_latency_ms": round(result.latency_ms, 2),
+                "total_latency_ms": round(total_latency_ms, 2),
+                "transcript_length": len(result.transcript),
+                "language_detected": result.language_detected,
+            },
+        )
+
+        # Warn if total latency exceeds target (5 seconds)
+        if total_latency_ms > 5000:
+            logger.warning(
+                "Recording processing latency exceeded target",
+                extra={
+                    "recording_id": str(recording.id),
+                    "total_latency_ms": round(total_latency_ms, 2),
+                    "target_ms": 5000,
+                },
+            )
+
+    except DeepgramTranscriptionError as e:
+        # Failure: mark recording as failed, do NOT decrement quota
+        recording.status = RecordingStatus.FAILED.value
+        await db.commit()
+
+        logger.error(
+            "Transcription failed",
+            extra={
+                "recording_id": str(recording.id),
+                "user_id": str(current_user.id),
+                "error": str(e),
+            },
+        )
+
+        raise TranscriptionFailedException(reason=str(e))
+
+    # Return response with transcript
     # TODO: Story 3.1 - Send transcript to Mistral for SOAP extraction
-
-    # For now, return a placeholder response
-    # The actual processing pipeline will be implemented in later stories
-    return RecordingResponse(
-        id=recording_id,
-        status=RecordingStatus.PROCESSING,
-        created_at=datetime.now(timezone.utc),
+    return RecordingWithTranscript(
+        id=str(recording.id),
+        status=RecordingStatus(recording.status),
+        duration_seconds=recording.duration_seconds,
+        language_detected=recording.language_detected,
+        transcript_text=recording.transcript_text,
+        created_at=recording.created_at,
     )

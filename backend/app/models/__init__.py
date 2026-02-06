@@ -2,7 +2,16 @@
 
 from app.models.base import Base, TimestampMixin
 from app.models.plan import Plan
+from app.models.recording import Recording
 from app.models.subscription import Subscription, SubscriptionStatus
 from app.models.user import User
 
-__all__ = ["Base", "TimestampMixin", "User", "Plan", "Subscription", "SubscriptionStatus"]
+__all__ = [
+    "Base",
+    "TimestampMixin",
+    "User",
+    "Plan",
+    "Recording",
+    "Subscription",
+    "SubscriptionStatus",
+]

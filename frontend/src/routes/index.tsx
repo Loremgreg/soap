@@ -6,7 +6,7 @@ import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute';
 import { useAuth } from '@/features/auth';
 import { useSubscription, TrialExpiredModal } from '@/features/billing';
 import { AppShell, PageContainer } from '@/components/layout';
-import { RecordButton, Timer, useRecording, useWakeLock } from '@/features/recording';
+import { RecordButton, Timer, useRecording, useWakeLock, createRecording } from '@/features/recording';
 import { useToast } from '@/hooks/use-toast';
 
 /**
@@ -142,13 +142,39 @@ function HomePage() {
     }
 
     if (audioBlob) {
-      // TODO: Story 2.3 - Send to backend for processing via Deepgram streaming
-      toast({
-        title: t('recording.processing'),
-        variant: 'default',
-      });
+      try {
+        toast({
+          title: t('recording.processing'),
+          variant: 'default',
+        });
+
+        // Send to backend for transcription via Deepgram
+        const result = await createRecording(audioBlob, recording.duration);
+
+        // Show success with transcript preview
+        if (result.status === 'completed' && result.transcriptText) {
+          const preview = result.transcriptText.substring(0, 100);
+          toast({
+            title: t('recording.success'),
+            description: preview + (result.transcriptText.length > 100 ? '...' : ''),
+            variant: 'default',
+          });
+        } else if (result.status === 'failed') {
+          toast({
+            title: t('recording.error'),
+            description: t('recording.transcriptionFailed'),
+            variant: 'destructive',
+          });
+        }
+      } catch (error) {
+        toast({
+          title: t('recording.error'),
+          description: error instanceof Error ? error.message : t('recording.uploadFailed'),
+          variant: 'destructive',
+        });
+      }
     }
-  }, [recording.controls, wakeLock, t, toast]);
+  }, [recording.controls, recording.duration, wakeLock, t, toast]);
 
   /**
    * Handles the record button click based on current state.

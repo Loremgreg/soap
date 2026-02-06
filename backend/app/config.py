@@ -42,8 +42,12 @@ class Settings(BaseSettings):
     google_client_id: str = ""
     google_client_secret: str = ""
 
-    # External Services
+    # External Services - Deepgram
     deepgram_api_key: str = ""
+    deepgram_model: str = "nova-3"
+    deepgram_language: str = "multi"
+
+    # External Services - LLM
     mistral_api_key: str = ""
     llm_provider: Literal["mistral", "azure_openai"] = "mistral"
 
