@@ -1,5 +1,6 @@
 """Pydantic schemas for request/response validation."""
 
+from app.schemas.note import NoteCreate, NoteResponse, NoteUpdate
 from app.schemas.plan import PlanList, PlanResponse, PlanSummary
 from app.schemas.recording import (
     RecordingCreate,
@@ -15,6 +16,9 @@ from app.schemas.subscription import (
 from app.schemas.user import UserCreate, UserInDB, UserResponse, UserUpdate
 
 __all__ = [
+    "NoteCreate",
+    "NoteResponse",
+    "NoteUpdate",
     "UserCreate",
     "UserInDB",
     "UserResponse",
